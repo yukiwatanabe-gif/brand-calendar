@@ -8,10 +8,10 @@
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
 
   :root {
-    --bg: #f0fafb;
+    --bg: #ffffff;
     --surface: #ffffff;
-    --surface2: #e4f5f8;
-    --border: #c0e4ec;
+    --surface2: #f0f9fb;
+    --border: #d4edf2;
     --text: #1a3540;
     --text-muted: #6a9eaa;
     --accent: #1BBDD4;
@@ -43,23 +43,34 @@
   .header-right { display:flex; gap:7px; align-items:center; flex-wrap:wrap; }
 
   .nav-btn {
-    background:rgba(255,255,255,.2); border:1.5px solid rgba(255,255,255,.4); color:#ffffff;
+    background:transparent; border:1.5px solid var(--border); color:var(--text-muted);
     padding:6px 14px; border-radius:20px; cursor:pointer; font-family:'Noto Sans JP',sans-serif;
     font-size:.72rem; transition:all .15s; white-space:nowrap;
   }
-  .nav-btn:hover { background:rgba(255,255,255,.35); border-color:rgba(255,255,255,.7); }
-  .nav-btn.active, .nav-btn.today-btn { background:#fff; color:var(--accent); border-color:#fff; font-weight:700; }
-  .nav-btn.primary { background:#fff; color:var(--accent); border-color:#fff; font-weight:700; }
-  .nav-btn.primary:hover { opacity:.9; }
+  .nav-btn:hover { border-color:var(--accent); color:var(--accent); }
+  .nav-btn.active, .nav-btn.today-btn { border-color:var(--accent); color:var(--accent); font-weight:700; }
+  .nav-btn.primary { background:var(--accent); color:#fff; border-color:var(--accent); font-weight:700; box-shadow:0 2px 8px rgba(27,189,212,.3); }
+  .nav-btn.primary:hover { opacity:.88; }
   .nav-btn.gcal { background:#1a73e8; color:#fff; border-color:#1a73e8; }
   .nav-btn.gcal:hover { opacity:.88; }
-  .date-label { font-family:'Noto Sans JP',sans-serif; font-size:.8rem; color:#fff; background:rgba(255,255,255,.15); border:1.5px solid rgba(255,255,255,.35); padding:6px 14px; border-radius:20px; min-width:200px; text-align:center; }
+  .date-label { font-family:'Noto Sans JP',sans-serif; font-size:.8rem; color:var(--text); background:var(--surface); border:1.5px solid var(--border); padding:6px 14px; border-radius:20px; min-width:200px; text-align:center; }
+
+  /* header overrides — white style on teal bg */
+  header .nav-btn { background:rgba(255,255,255,.2); border-color:rgba(255,255,255,.4); color:#fff; }
+  header .nav-btn:hover { background:rgba(255,255,255,.35); border-color:rgba(255,255,255,.7); color:#fff; }
+  header .nav-btn.active, header .nav-btn.today-btn { background:#fff; color:var(--accent); border-color:#fff; }
+  header .nav-btn.primary { background:#fff; color:var(--accent); border-color:#fff; box-shadow:none; }
+  header .date-label { color:#fff; background:rgba(255,255,255,.15); border-color:rgba(255,255,255,.35); }
 
   /* view toggle */
-  .view-toggle { display:flex; gap:0; border:1.5px solid rgba(255,255,255,.4); border-radius:20px; overflow:hidden; }
-  .vt-btn { background:transparent; border:none; color:rgba(255,255,255,.8); padding:6px 14px; cursor:pointer; font-family:'Noto Sans JP',sans-serif; font-size:.72rem; transition:all .15s; }
-  .vt-btn.active { background:#fff; color:var(--accent); font-weight:700; }
-  .vt-btn:hover:not(.active) { background:rgba(255,255,255,.2); color:#fff; }
+  .view-toggle { display:flex; gap:0; border:1.5px solid var(--border); border-radius:20px; overflow:hidden; }
+  .vt-btn { background:transparent; border:none; color:var(--text-muted); padding:6px 14px; cursor:pointer; font-family:'Noto Sans JP',sans-serif; font-size:.72rem; transition:all .15s; }
+  .vt-btn.active { background:var(--accent); color:#fff; font-weight:700; }
+  .vt-btn:hover:not(.active) { background:var(--surface2); color:var(--text); }
+  header .view-toggle { border-color:rgba(255,255,255,.4); }
+  header .vt-btn { color:rgba(255,255,255,.8); }
+  header .vt-btn.active { background:#fff; color:var(--accent); }
+  header .vt-btn:hover:not(.active) { background:rgba(255,255,255,.2); color:#fff; }
 
   /* ── Filters ── */
   .filter-bar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:10px; }
@@ -274,12 +285,12 @@
   .kpi-ch-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
   .kpi-ch-card { background:var(--surface); border:1.5px solid var(--border); border-radius:6px; overflow:hidden; }
   .kpi-ch-head { padding:9px 13px; display:flex; align-items:center; justify-content:space-between; }
-  .kpi-ch-name { font-family:'Noto Sans JP',sans-serif; font-size:.7rem; font-weight:700; letter-spacing:.05em; }
-  .kpi-ch-badge { font-size:.7rem; font-weight:700; padding:2px 9px; border-radius:10px; }
+  .kpi-ch-name { font-family:'Noto Sans JP',sans-serif; font-size:.95rem; font-weight:700; letter-spacing:.03em; }
+  .kpi-ch-badge { font-size:.95rem; font-weight:700; padding:3px 11px; border-radius:10px; }
   .kpi-metric { display:flex; align-items:center; gap:8px; padding:6px 13px; border-top:1px solid var(--border); }
   .kpi-metric-lbl { color:var(--text-muted); flex:1; font-size:.64rem; font-family:'Noto Sans JP',sans-serif; text-transform:uppercase; letter-spacing:.04em; }
   .kpi-metric-val { font-size:.71rem; font-weight:600; color:var(--text); }
-  .kpi-metric-rate { font-weight:700; padding:1px 7px; border-radius:8px; font-size:.68rem; white-space:nowrap; }
+  .kpi-metric-rate { font-weight:700; padding:3px 10px; border-radius:8px; font-size:.85rem; white-space:nowrap; }
   .kpi-setup-hint { background:var(--surface); border:1.5px dashed var(--border); border-radius:6px; padding:18px; font-size:.75rem; color:var(--text-muted); cursor:pointer; transition:border-color .13s; text-align:center; }
   .kpi-setup-hint:hover { border-color:var(--accent); color:var(--accent); }
   .kpi-status-bar { font-size:.72rem; color:var(--text-muted); padding:10px 0; }
@@ -1476,6 +1487,7 @@ function downloadICS(){
 // ── KPI Sheet ──
 let kpiData = [];   // [{channel,label,target,actual,yoy}]
 let kpiLoadStatus = 'idle'; // idle|loading|ok|error|unconfigured
+let kpiChVisible = localStorage.getItem('bs3_kpi_visible') !== 'false';
 
 async function loadKPIData(){
   // 旧方式（直接CSV URL）が残っていればクリア
@@ -1525,17 +1537,10 @@ function parseKPICSV(text){
 }
 
 const KPI_CH_COLOR={
-  '全体':        {bg:'#EDEBE6',fg:'#3A3A3A'},
-  'Shopify':     {bg:'#EDEBE6',fg:'#2D2A26'},
-  '楽天':        {bg:'#FBEAEA',fg:'#820000'},
-  'Amazon':      {bg:'#FDF0E6',fg:'#8B3A00'},
-  'Yahoo':       {bg:'#FBEAEE',fg:'#660022'},
-  'LINE':        {bg:'#E6F6EE',fg:'#025C30'},
-  'LINEギフト':  {bg:'#E6F6EE',fg:'#025C30'},
-  'ふるさと':    {bg:'#E8EFF8',fg:'#1A4070'},
-  'ふるさと納税':{bg:'#E8EFF8',fg:'#1A4070'},
+  'ALL':         {bg:'#FDF0E6',fg:'#8B3A00'},
+  '全体':        {bg:'#FDF0E6',fg:'#8B3A00'},
 };
-function kpiChColor(ch){ return KPI_CH_COLOR[ch]||{bg:'#F0EEEB',fg:'#444444'}; }
+function kpiChColor(ch){ return KPI_CH_COLOR[ch]||{bg:'#F2F2F2',fg:'#555555'}; }
 
 function kpiRateStyle(rate){
   if(rate>=1.10) return {bg:'#C8EDD4',fg:'#145A2A',label:'◎'};
@@ -1556,10 +1561,17 @@ function fmtKPIVal(val,label){
   return Math.round(val).toLocaleString();
 }
 
+function toggleKpiCh(){
+  kpiChVisible=!kpiChVisible;
+  localStorage.setItem('bs3_kpi_visible', kpiChVisible);
+  renderDashboard();
+}
+
 function renderKPIChannelSection(container){
   const sec=document.createElement('div');
   sec.className='dash-section';
-  sec.innerHTML='<div class="dash-section-title">📊 チャネル別 KPI</div>';
+  const toggleLabel=kpiChVisible?'▲ 非表示':'▼ 表示';
+  sec.innerHTML=`<div class="dash-section-title">📊 チャネル別 KPI<button onclick="toggleKpiCh()" style="margin-left:auto;background:transparent;border:1.5px solid var(--border);border-radius:20px;padding:2px 12px;font-size:.65rem;color:var(--text-muted);cursor:pointer;font-family:'Noto Sans JP',sans-serif;">${toggleLabel}</button></div>`;
 
   if(kpiLoadStatus==='unconfigured'){
     const hint=document.createElement('div');
@@ -1603,6 +1615,8 @@ function renderKPIChannelSection(container){
   // チャネル一覧（'全体' を先頭に）
   const channels=[...new Set(kpiData.map(r=>r.channel))];
   const sorted=['全体',...channels.filter(c=>c!=='全体')];
+
+  if(!kpiChVisible){ container.appendChild(sec); return; }
 
   const grid=document.createElement('div');
   grid.className='kpi-ch-grid';
