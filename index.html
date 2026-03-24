@@ -695,7 +695,7 @@ async function loadFromSheetDynamic(){
     if(!res.ok) throw new Error('HTTP '+res.status);
     const json=await res.json();
     // Apps Script が返すJSON配列をイベント形式に変換
-    window._sheetsEvents=json.map(row=>({
+    window._sheetsEvents=json.map((row,i)=>({
       id:'S'+Math.random().toString(36).slice(2,9),
       title:String(row.title||'').trim(),
       start:formatDateValue(row.start),
@@ -705,6 +705,7 @@ async function loadFromSheetDynamic(){
       memo:String(row.memo||'').trim(),
       tentative:row.tentative===true||String(row.tentative||'').toUpperCase()==='TRUE',
       _fromSheet:true,
+      _row:i+2,
     })).filter(e=>e.title&&e.start);
     sheetStatus='ok';
   } catch(e){
