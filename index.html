@@ -1182,9 +1182,10 @@ function saveEvent(){
   if(sheetUrl){
     fetch(sheetUrl,{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      mode:'no-cors',
+      headers:{'Content-Type':'text/plain'},
       body:JSON.stringify({...newEv, tentative:tentative?'TRUE':'FALSE'}),
-    }).then(()=>loadFromSheetDynamic()).catch(()=>{
+    }).then(()=>{ setTimeout(()=>loadFromSheetDynamic(), 1500); }).catch(()=>{
       // 書き込み失敗時はローカルに保存
       const evs=loadEvents(); evs.push(newEv); saveEvents(evs); render();
     });
@@ -1251,9 +1252,10 @@ function updateEvent(){
   if(sheetUrl && ev._fromSheet && ev._row){
     fetch(sheetUrl,{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      mode:'no-cors',
+      headers:{'Content-Type':'text/plain'},
       body:JSON.stringify({...updated, action:'update', _row:ev._row, tentative:tentative?'TRUE':'FALSE'}),
-    }).then(()=>loadFromSheetDynamic()).catch(()=>{ render(); });
+    }).then(()=>{ setTimeout(()=>loadFromSheetDynamic(), 1500); }).catch(()=>{ render(); });
   } else {
     const evs=loadEvents().map(e=>e.id===selectedId?updated:e);
     saveEvents(evs); render();
@@ -1268,9 +1270,10 @@ function deleteEvent(){
   if(sheetUrl && ev && ev._fromSheet && ev._row){
     fetch(sheetUrl,{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      mode:'no-cors',
+      headers:{'Content-Type':'text/plain'},
       body:JSON.stringify({action:'delete', _row:ev._row}),
-    }).then(()=>loadFromSheetDynamic()).catch(()=>{ render(); });
+    }).then(()=>{ setTimeout(()=>loadFromSheetDynamic(), 1500); }).catch(()=>{ render(); });
   } else {
     saveEvents(loadEvents().filter(e=>e.id!==selectedId)); render();
   }
