@@ -1273,15 +1273,17 @@ function deleteEvent(){
   if(!confirm('このイベントを削除しますか？')) return;
   const ev=loadEvents().find(e=>e.id===selectedId);
   const sheetUrl=window._sheetURL||localStorage.getItem('bs3_sheet_url')||SHEET_CSV_URL;
+  // 即座にUIから削除（楽観的更新）
+  window._sheetsEvents=(window._sheetsEvents||[]).filter(e=>e.id!==selectedId);
+  saveEvents(loadEvents().filter(e=>e.id!==selectedId));
+  render();
   if(sheetUrl && ev && ev._fromSheet && ev._row){
     fetch(sheetUrl,{
       method:'POST',
       mode:'no-cors',
       headers:{'Content-Type':'text/plain'},
       body:JSON.stringify({action:'delete', _row:ev._row}),
-    }).then(()=>{ setTimeout(()=>loadFromSheetDynamic(), 1500); }).catch(()=>{ render(); });
-  } else {
-    saveEvents(loadEvents().filter(e=>e.id!==selectedId)); render();
+    }).then(()=>{ setTimeout(()=>loadFromSheetDynamic(), 2000); }).catch(()=>{});
   }
   closeModals();
 }
