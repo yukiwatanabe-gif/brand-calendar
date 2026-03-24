@@ -359,6 +359,7 @@ function checkPW(){
     <div class="view-toggle">
       <button class="vt-btn active" id="vtWeek" onclick="switchView('week')">7日</button>
       <button class="vt-btn" id="vtMonth" onclick="switchView('month')">月表示</button>
+      <button class="vt-btn" id="vtTimeline" onclick="switchView('timeline')">タイムライン</button>
       <button class="vt-btn" id="vtDash" onclick="switchView('dashboard')">ダッシュボード</button>
     </div>
     <button class="nav-btn" id="prevBtn" onclick="shiftPeriod(-1)">← 前</button>
@@ -417,6 +418,7 @@ function checkPW(){
 
 <!-- Dashboard View -->
 <div id="dashboardView"></div>
+<div id="timelineView" style="display:none"></div>
 
 <!-- 近日スタート（週・月共通） -->
 <div class="upcoming-section">
@@ -931,12 +933,14 @@ function switchView(v){
   offset = 0;
   document.getElementById('vtWeek').classList.toggle('active', v==='week');
   document.getElementById('vtMonth').classList.toggle('active', v==='month');
+  document.getElementById('vtTimeline').classList.toggle('active', v==='timeline');
   document.getElementById('vtDash').classList.toggle('active', v==='dashboard');
   document.getElementById('weekView').style.display = v==='week' ? 'block' : 'none';
   document.getElementById('monthView').style.display = v==='month' ? 'block' : 'none';
   document.getElementById('dashboardView').style.display = v==='dashboard' ? 'block' : 'none';
-  document.querySelector('.upcoming-section').style.display = v==='dashboard' ? 'none' : '';
-  const nav = v !== 'dashboard';
+  document.getElementById('timelineView').style.display = v==='timeline' ? 'block' : 'none';
+  document.querySelector('.upcoming-section').style.display = (v==='dashboard'||v==='timeline') ? 'none' : '';
+  const nav = (v==='week'||v==='month');
   document.getElementById('prevBtn').style.display = nav ? '' : 'none';
   document.getElementById('nextBtn').style.display = nav ? '' : 'none';
   document.getElementById('periodLabel').style.display = nav ? '' : 'none';
@@ -978,6 +982,7 @@ function toDateStr(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d
 function render(){
   if(currentView==='week') renderWeek();
   else if(currentView==='month') renderMonth();
+  else if(currentView==='timeline') renderStandaloneTimeline();
   else renderDashboard();
 }
 
@@ -1774,6 +1779,20 @@ function makeDashRow(ev){
     <span class="dash-ev-dates">${dateStr}</span>`;
   row.onclick=()=>openDetail(ev.id);
   return row;
+}
+
+function renderStandaloneTimeline(){
+  const container = document.getElementById('timelineView');
+  container.innerHTML = '';
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'padding:20px 0;';
+  const title = document.createElement('div');
+  title.style.cssText = 'font-size:.75rem;font-weight:700;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px;padding:0 4px;';
+  title.textContent = 'タイムライン（直近90日）';
+  wrap.appendChild(title);
+  const evs = loadEvents().filter(ev => shouldShow(ev));
+  renderTimeline(evs, wrap);
+  container.appendChild(wrap);
 }
 
 function renderTimeline(events, container){
