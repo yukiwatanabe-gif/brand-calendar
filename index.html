@@ -795,6 +795,20 @@ const CATS = {
 const TEAMS = { all:'全チーム', promo:'プロモーション', sponsor:'協賛', ad:'広告', ec:'EC', design:'デザイン', vmd:'VMD' };
 const VALID_TYPES = Object.keys(CATS);
 const VALID_TEAMS = Object.keys(TEAMS);
+
+// キャンペーンごとの固有カラー（タイトルハッシュ → パレット）
+const CAMPAIGN_PALETTE = [
+  '#e05a2a','#d63384','#7c3aed','#2563eb','#0d9488',
+  '#16a34a','#d97706','#e11d48','#0891b2','#4f46e5',
+  '#b45309','#059669','#9333ea','#0284c7','#c2410c',
+];
+function campaignColor(title){
+  if(!title) return CAMPAIGN_PALETTE[0];
+  let h=0;
+  for(let i=0;i<title.length;i++){ h=((h<<5)-h)+title.charCodeAt(i); h|=0; }
+  return CAMPAIGN_PALETTE[Math.abs(h)%CAMPAIGN_PALETTE.length];
+}
+function evColor(ev){ return ev.type==='campaign'?campaignColor(ev.title):CATS[ev.type].color; }
 const DAY_NAMES = ['日','月','火','水','木','金','土'];
 const MONTH_NAMES = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
 
@@ -1037,7 +1051,7 @@ function renderUpcoming(events, today){
     chip.className='up-chip';
     const tentative=ev.tentative===true||ev.tentative==='TRUE'||ev.tentative==='true';
     const tentBadge=tentative?`<span style="font-size:.6rem;color:var(--cat-deadline);background:var(--cat-deadline-soft);padding:1px 6px;border-radius:8px;border:1px solid var(--cat-deadline);">仮</span>`:'';
-    chip.innerHTML=`<span class="up-dot" style="background:${CATS[ev.type].color}"></span><span>${tentBadge}${tentative?`〔仮〕${ev.title}`:ev.title}</span><span style="font-size:.6rem;color:var(--text-muted)">${TEAMS[ev.team]||TEAMS.all}</span><span class="up-date">${fmt(ev.start)}〜</span>`;
+    chip.innerHTML=`<span class="up-dot" style="background:${evColor(ev)}"></span><span>${tentBadge}${tentative?`〔仮〕${ev.title}`:ev.title}</span><span style="font-size:.6rem;color:var(--text-muted)">${TEAMS[ev.team]||TEAMS.all}</span><span class="up-date">${fmt(ev.start)}〜</span>`;
     chip.onclick=()=>openDetail(ev.id);
     list.appendChild(chip);
   });
@@ -1097,9 +1111,9 @@ function renderMonth(){
       const tentative=ev.tentative===true||ev.tentative==='TRUE'||ev.tentative==='true';
       const pill=document.createElement('div');
       pill.className='month-event'+(tentative?' tentative':'');
-      pill.style.background=CATS[ev.type].color+'22';
-      pill.style.color=CATS[ev.type].color;
-      pill.style.borderLeft=`3px solid ${CATS[ev.type].color}`;
+      pill.style.background=evColor(ev)+'22';
+      pill.style.color=evColor(ev);
+      pill.style.borderLeft=`3px solid ${evColor(ev)}`;
       pill.textContent=tentative?`〔仮〕${ev.title}`:ev.title;
       pill.onclick=()=>openDetail(ev.id);
       cell.appendChild(pill);
@@ -1127,6 +1141,11 @@ function makeEventCard(ev){
   const hidden=!shouldShow(ev);
   const tentative=ev.tentative===true||ev.tentative==='TRUE'||ev.tentative==='true';
   card.className=`event-card c-${ev.type}${hidden?' hidden':''}${(ev.end&&ev.end!==ev.start)?' is-span':''}${tentative?' tentative':''}`;
+  if(ev.type==='campaign'){
+    const c=campaignColor(ev.title);
+    card.style.borderLeftColor=c;
+    card.style.background=c+'18';
+  }
   card.innerHTML=`
     <div class="ev-cat">${CATS[ev.type].icon} ${CATS[ev.type].label}</div>
     <div class="ev-title">${ev.title}</div>
@@ -1345,7 +1364,7 @@ function parseCSV(text){
   parsed.slice(0,8).forEach(ev=>{
     const row=document.createElement('div');
     row.className='csv-preview-row';
-    row.innerHTML=`<span style="color:${CATS[ev.type].color}">●</span><strong>${ev.title}</strong><span style="color:var(--text-muted)">${ev.start}</span><span style="color:var(--text-muted);font-size:.6rem">${TEAMS[ev.team]}</span>`;
+    row.innerHTML=`<span style="color:${evColor(ev)}">●</span><strong>${ev.title}</strong><span style="color:var(--text-muted)">${ev.start}</span><span style="color:var(--text-muted);font-size:.6rem">${TEAMS[ev.team]}</span>`;
     preview.appendChild(row);
   });
   if(parsed.length>8){
@@ -1745,9 +1764,9 @@ function makeDashRow(ev){
   const dateStr=evEnd!==ev.start?`${fmt(ev.start)}〜${fmt(evEnd)}`:fmt(ev.start);
   const tentBadge=tent?`<span class="dash-tent-badge">仮</span>`:'';
   row.innerHTML=`
-    <span class="dash-ev-dot" style="background:${CATS[ev.type].color}"></span>
-    <span class="dash-ev-title">${tentBadge}${ev.title}</span>
-    <span class="dash-ev-cat" style="color:${CATS[ev.type].color};background:${CATS[ev.type].color}18">${CATS[ev.type].label}</span>
+    <span class="dash-ev-dot" style="background:${evColor(ev)}"></span>
+<span class="dash-ev-title">${tentBadge}${ev.title}</span>
+    <span class="dash-ev-cat" style="color:${evColor(ev)};background:${evColor(ev)}18">${CATS[ev.type].label}</span>
     <span class="dash-ev-team">${TEAMS[ev.team]||TEAMS.all}</span>
     <span class="dash-ev-dates">${dateStr}</span>`;
   row.onclick=()=>openDetail(ev.id);
@@ -1812,7 +1831,7 @@ function renderTimeline(events, container){
 
     const nameEl=document.createElement('div');
     nameEl.className='tl-ev-name';
-    nameEl.style.borderLeft=`3px solid ${CATS[ev.type].color}`;
+    nameEl.style.borderLeft=`3px solid ${evColor(ev)}`;
     nameEl.textContent=tent?`〔仮〕${ev.title}`:ev.title;
     nameEl.title=ev.title;
     nameEl.onclick=()=>openDetail(ev.id);
@@ -1840,8 +1859,8 @@ function renderTimeline(events, container){
       const barW=Math.max(DW,(bEnd-bStart+1)*DW-2);
       bar.style.left=(bStart*DW)+'px';
       bar.style.width=barW+'px';
-      if(tent){ bar.style.border=`1.5px dashed ${CATS[ev.type].color}`; bar.style.color=CATS[ev.type].color; }
-      else { bar.style.background=CATS[ev.type].color+'cc'; }
+      if(tent){ bar.style.border=`1.5px dashed ${evColor(ev)}`; bar.style.color=evColor(ev); }
+      else { bar.style.background=evColor(ev)+'cc'; }
       bar.title=`${ev.title}：${ev.start}〜${evEnd}`;
       bar.onclick=()=>openDetail(ev.id);
       if(barW>40) bar.textContent=ev.title;
