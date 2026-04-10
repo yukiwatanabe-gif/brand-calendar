@@ -251,6 +251,7 @@
   .dash-section-title { font-family:'Noto Sans JP',sans-serif; font-size:.63rem; letter-spacing:.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:10px; display:flex; align-items:center; gap:10px; }
   .dash-section-title::after { content:''; flex:1; height:1px; background:var(--border); }
   .dash-two-col { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:22px; }
+  .dash-three-col { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:22px; }
   .dash-event-list { display:flex; flex-direction:column; gap:5px; }
   .dash-event-row { background:var(--surface); border:1.5px solid var(--border); border-radius:5px; padding:8px 13px; display:flex; align-items:center; gap:10px; cursor:pointer; transition:border-color .13s; flex-wrap:wrap; }
   .dash-event-row:hover { border-color:var(--accent); }
@@ -300,6 +301,7 @@
   @media (max-width:800px) {
     .kpi-grid { grid-template-columns:repeat(2,1fr); }
     .dash-two-col { grid-template-columns:1fr; }
+    .dash-three-col { grid-template-columns:1fr; }
     .tl-name-col, .tl-ev-name { width:110px; min-width:110px; }
     .kpi-ch-grid { grid-template-columns:repeat(2,1fr); }
   }
@@ -1715,6 +1717,7 @@ function renderDashboard(){
   const campaignCnt=monthEvs.filter(ev=>ev.type==='campaign').length;
   const activeEvs=filtered.filter(ev=>{ const e=ev.end||ev.start; return ev.start<=tStr&&e>=tStr; }).sort((a,b)=>a.start.localeCompare(b.start));
   const tentEvs=filtered.filter(ev=>ev.tentative===true||ev.tentative==='TRUE'||ev.tentative==='true').sort((a,b)=>a.start.localeCompare(b.start));
+  const upcomingEvs=filtered.filter(ev=>{ const tent=ev.tentative===true||ev.tentative==='TRUE'||ev.tentative==='true'; return !tent&&ev.start>tStr; }).sort((a,b)=>a.start.localeCompare(b.start));
   const weekEvs=filtered.filter(ev=>{ const e=ev.end||ev.start; return ev.start<=wEndStr&&e>=wStartStr; }).sort((a,b)=>a.start.localeCompare(b.start));
   const allTentCnt=events.filter(ev=>ev.tentative===true||ev.tentative==='TRUE'||ev.tentative==='true').length;
 
@@ -1740,9 +1743,9 @@ function renderDashboard(){
   // KPI Channel Cards (from spreadsheet)
   renderKPIChannelSection(con);
 
-  // Active + Tentative (2 columns)
+  // Active + Upcoming + Tentative (3 columns)
   const two=document.createElement('div');
-  two.className='dash-two-col';
+  two.className='dash-three-col';
 
   const mkSection=(title,evList,emptyMsg)=>{
     const sec=document.createElement('div');
@@ -1756,6 +1759,7 @@ function renderDashboard(){
     return sec;
   };
   two.appendChild(mkSection('進行中のイベント', activeEvs, '現在進行中のイベントはありません'));
+  two.appendChild(mkSection('今後のイベント', upcomingEvs, '今後のイベントはありません'));
   two.appendChild(mkSection('仮イベント一覧', tentEvs, '未確定のイベントはありません'));
   con.appendChild(two);
 
