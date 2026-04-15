@@ -8,24 +8,24 @@
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
 
   :root {
-    --bg: #f5f6f7;
-    --surface: #f9fafb;
-    --surface2: #eef0f2;
-    --border: #cdd4d8;
-    --text: #2c3e45;
-    --text-muted: #7d9099;
-    --accent: #5a9aaa;
-    --accent-dark: #4a8292;
-    --cat-campaign: #e05a2a;
-    --cat-launch:   #2a9e5c;
-    --cat-deadline: #8b3fcf;
-    --cat-event:    #1a7ec8;
-    --cat-other:    #7a8a82;
-    --cat-campaign-soft: rgba(224,90,42,0.13);
-    --cat-launch-soft:   rgba(42,158,92,0.13);
-    --cat-deadline-soft: rgba(139,63,207,0.13);
-    --cat-event-soft:    rgba(26,126,200,0.13);
-    --cat-other-soft:    rgba(122,138,130,0.12);
+    --bg: #f0f2f4;
+    --surface: #f7f9fa;
+    --surface2: #e8ecef;
+    --border: #b8c2c8;
+    --text: #1a2830;
+    --text-muted: #6a8090;
+    --accent: #3d8496;
+    --accent-dark: #2e6e80;
+    --cat-campaign: #d94f1e;
+    --cat-launch:   #1e8f50;
+    --cat-deadline: #c0392b;
+    --cat-event:    #1565c0;
+    --cat-other:    #5a6a72;
+    --cat-campaign-soft: rgba(217,79,30,0.12);
+    --cat-launch-soft:   rgba(30,143,80,0.12);
+    --cat-deadline-soft: rgba(192,57,43,0.15);
+    --cat-event-soft:    rgba(21,101,192,0.11);
+    --cat-other-soft:    rgba(90,106,114,0.10);
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family:'Noto Sans JP',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding:0; }
@@ -104,13 +104,13 @@
   /* ── MONTH VIEW ── */
   #monthView { display:none; margin-bottom:28px; }
   .month-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:1px; background:var(--border); border:1.5px solid var(--border); border-radius:12px; overflow:hidden; }
-  .month-dayname { background:var(--surface2); padding:8px 0; text-align:center; font-family:'Noto Sans JP',sans-serif; font-size:.63rem; color:var(--text-muted); letter-spacing:.06em; }
+  .month-dayname { background:var(--surface2); padding:8px 0; text-align:center; font-family:'Noto Sans JP',sans-serif; font-size:.63rem; color:var(--text); font-weight:600; letter-spacing:.06em; }
   .month-cell {
     background:var(--surface); min-height:100px; padding:6px; display:flex; flex-direction:column; gap:3px; cursor:default;
   }
-  .month-cell.other-month { background:#f3fafb; }
-  .month-cell.today { background:#e4edf0; }
-  .month-cell-num { font-family:'Noto Sans JP',sans-serif; font-size:1.1rem; font-weight:700; margin-bottom:2px; color:var(--text-muted); line-height:1; }
+  .month-cell.other-month { background:#eef2f4; }
+  .month-cell.today { background:#ddeaf0; }
+  .month-cell-num { font-family:'Noto Sans JP',sans-serif; font-size:1.1rem; font-weight:700; margin-bottom:2px; color:#4a6070; line-height:1; }
   .month-cell.today .month-cell-num { color:var(--accent); }
   .month-event {
     border-radius:3px; padding:2px 6px; font-size:.62rem; font-weight:500; cursor:pointer;
@@ -123,10 +123,10 @@
   .month-add-btn:hover { color:var(--accent); }
 
   /* ── Event Cards ── */
-  .event-card { border-radius:8px; padding:6px 9px; font-size:.69rem; border-left:6px solid transparent; cursor:pointer; transition:transform .12s, box-shadow .12s; position:relative; }
-  .event-card:hover { transform:translateX(2px); box-shadow:2px 2px 8px rgba(0,0,0,.07); }
-  .ev-cat { font-family:'Noto Sans JP',sans-serif; font-size:.57rem; opacity:.7; letter-spacing:.07em; text-transform:uppercase; margin-bottom:2px; }
-  .ev-title { font-weight:500; line-height:1.35; color:var(--text); }
+  .event-card { border-radius:8px; padding:6px 9px; font-size:.69rem; border-left:6px solid transparent; border:1px solid rgba(0,0,0,.07); border-left-width:6px; cursor:pointer; transition:transform .12s, box-shadow .12s; position:relative; }
+  .event-card:hover { transform:translateX(2px); box-shadow:2px 3px 10px rgba(0,0,0,.10); }
+  .ev-cat { font-family:'Noto Sans JP',sans-serif; font-size:.57rem; opacity:.75; letter-spacing:.07em; text-transform:uppercase; margin-bottom:2px; font-weight:600; }
+  .ev-title { font-weight:700; line-height:1.35; color:#111820; }
   .ev-team { font-size:.58rem; margin-top:3px; color:var(--text-muted); }
   .event-card.is-span::after { content:'↔'; position:absolute; right:6px; top:6px; opacity:.35; font-size:.62rem; }
   .event-card.hidden { display:none; }
@@ -135,7 +135,7 @@
   .month-event.tentative { border-left-style:dashed; opacity:.7; }
   .c-campaign { background:var(--cat-campaign-soft); border-left-color:var(--cat-campaign); }
   .c-launch   { background:var(--cat-launch-soft);   border-left-color:var(--cat-launch); }
-  .c-deadline { background:var(--cat-deadline-soft); border-left-color:var(--cat-deadline); }
+  .c-deadline { background:var(--cat-deadline-soft); border-left-color:var(--cat-deadline); box-shadow:inset 0 0 0 1px rgba(192,57,43,.2); }
   .c-event    { background:var(--cat-event-soft);    border-left-color:var(--cat-event); }
   .c-other    { background:var(--cat-other-soft);    border-left-color:var(--cat-other); }
 
