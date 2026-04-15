@@ -1139,7 +1139,7 @@ function renderUpcoming(events, today){
     chip.className='up-chip';
     const tentative=ev.tentative===true||ev.tentative==='TRUE'||ev.tentative==='true';
     const tentBadge=tentative?`<span style="font-size:.6rem;color:var(--cat-deadline);background:var(--cat-deadline-soft);padding:1px 6px;border-radius:8px;border:1px solid var(--cat-deadline);">仮</span>`:'';
-    chip.innerHTML=`<span class="up-dot" style="background:${evColor(ev)}"></span><span>${tentBadge}${tentative?`〔仮〕${ev.title}`:ev.title}</span><span style="font-size:.6rem;color:var(--text-muted)">${TEAMS[ev.team]||TEAMS.all}</span><span class="up-date">${fmt(ev.start)}〜</span>`;
+    chip.innerHTML=`<span class="up-dot" style="background:${evColor(ev)}"></span><span>${tentBadge}${ev.title}</span><span style="font-size:.6rem;color:var(--text-muted)">${TEAMS[ev.team]||TEAMS.all}</span><span class="up-date">${fmt(ev.start)}〜</span>`;
     chip.onclick=()=>openDetail(ev.id);
     list.appendChild(chip);
   });
