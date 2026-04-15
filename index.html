@@ -809,13 +809,24 @@ const CAMPAIGN_PALETTE = [
   '#16a34a','#d97706','#e11d48','#0891b2','#4f46e5',
   '#b45309','#059669','#9333ea','#0284c7','#c2410c',
 ];
-function campaignColor(title){
-  if(!title) return CAMPAIGN_PALETTE[0];
+// 協賛案件ごとの固有カラー（案件ごとに鮮やかに区別）
+const SPONSOR_PALETTE = [
+  '#e91e63','#9c27b0','#3f51b5','#00897b','#f4511e',
+  '#ff9800','#43a047','#1e88e5','#d81b60','#6d4c41',
+  '#00acc1','#7cb342','#fb8c00','#8e24aa','#039be5',
+];
+function titleHash(title, palette){
+  if(!title) return palette[0];
   let h=0;
   for(let i=0;i<title.length;i++){ h=((h<<5)-h)+title.charCodeAt(i); h|=0; }
-  return CAMPAIGN_PALETTE[Math.abs(h)%CAMPAIGN_PALETTE.length];
+  return palette[Math.abs(h)%palette.length];
 }
-function evColor(ev){ return ev.type==='campaign'?campaignColor(ev.title):CATS[ev.type].color; }
+function campaignColor(title){ return titleHash(title, CAMPAIGN_PALETTE); }
+function sponsorColor(title){ return titleHash(title, SPONSOR_PALETTE); }
+function evColor(ev){
+  if(ev.team==='sponsor') return sponsorColor(ev.title);
+  return ev.type==='campaign'?campaignColor(ev.title):CATS[ev.type].color;
+}
 const DAY_NAMES = ['日','月','火','水','木','金','土'];
 const MONTH_NAMES = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
 
@@ -1155,6 +1166,11 @@ function makeEventCard(ev){
     const c=campaignColor(ev.title);
     card.style.borderLeftColor=c;
     card.style.background=c+'18';
+  }
+  if(ev.team==='sponsor'){
+    const c=sponsorColor(ev.title);
+    card.style.borderLeftColor=c;
+    card.style.background=c+'20';
   }
   card.innerHTML=`
     <div class="ev-cat">${CATS[ev.type].icon} ${CATS[ev.type].label}</div>
