@@ -1,0 +1,1926 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brand Strategy — Campaign Calendar</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
+
+  :root {
+    --bg: #f5f6f7;
+    --surface: #f9fafb;
+    --surface2: #eef0f2;
+    --border: #cdd4d8;
+    --text: #2c3e45;
+    --text-muted: #7d9099;
+    --accent: #5a9aaa;
+    --accent-dark: #4a8292;
+    --cat-campaign: #b8604a;
+    --cat-launch:   #4a9268;
+    --cat-deadline: #7a5498;
+    --cat-event:    #4a7eaa;
+    --cat-other:    #7a8a82;
+    --cat-campaign-soft: rgba(184,96,74,0.12);
+    --cat-launch-soft:   rgba(74,146,104,0.12);
+    --cat-deadline-soft: rgba(122,84,152,0.12);
+    --cat-event-soft:    rgba(74,126,170,0.12);
+    --cat-other-soft:    rgba(122,138,130,0.12);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans JP',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding:0; }
+  .app-wrap { max-width:100vw; padding:16px; overflow-x:hidden; }
+
+  /* ── Header ── */
+  header {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:20px; padding:14px 22px;
+    background:var(--accent); border-radius:14px;
+    flex-wrap:wrap; gap:12px;
+    overflow:hidden;
+  }
+  .header-left h1 { font-family:'Noto Sans JP',sans-serif; font-size:1.5rem; font-weight:700; color:#ffffff; letter-spacing:.04em; line-height:1; }
+  .header-left p { font-size:.68rem; color:rgba(255,255,255,.75); margin-top:4px; font-family:'Noto Sans JP',sans-serif; letter-spacing:.08em; text-transform:uppercase; }
+  .header-right { display:flex; gap:7px; align-items:center; flex-wrap:wrap; }
+
+  .nav-btn {
+    background:transparent; border:1.5px solid var(--border); color:var(--text-muted);
+    padding:6px 14px; border-radius:20px; cursor:pointer; font-family:'Noto Sans JP',sans-serif;
+    font-size:.72rem; transition:all .15s; white-space:nowrap;
+  }
+  .nav-btn:hover { border-color:var(--accent); color:var(--accent); }
+  .nav-btn.active, .nav-btn.today-btn { border-color:var(--accent); color:var(--accent); font-weight:700; }
+  .nav-btn.primary { background:var(--accent); color:#fff; border-color:var(--accent); font-weight:700; }
+  .nav-btn.primary:hover { opacity:.88; }
+  .nav-btn.gcal { background:#1a73e8; color:#fff; border-color:#1a73e8; }
+  .nav-btn.gcal:hover { opacity:.88; }
+  .date-label { font-family:'Noto Sans JP',sans-serif; font-size:.8rem; color:var(--text); background:var(--surface); border:1.5px solid var(--border); padding:6px 14px; border-radius:20px; min-width:120px; text-align:center; }
+
+  /* header overrides — white style on teal bg */
+  header .nav-btn { background:rgba(255,255,255,.2); border-color:rgba(255,255,255,.4); color:#fff; }
+  header .nav-btn:hover { background:rgba(255,255,255,.35); border-color:rgba(255,255,255,.7); color:#fff; }
+  header .nav-btn.active, header .nav-btn.today-btn { background:#fff; color:var(--accent); border-color:#fff; }
+  header .nav-btn.primary { background:#fff; color:var(--accent); border-color:#fff; box-shadow:none; }
+  header .date-label { color:#fff; background:rgba(255,255,255,.15); border-color:rgba(255,255,255,.35); }
+
+  /* view toggle */
+  .view-toggle { display:flex; gap:0; border:1.5px solid var(--border); border-radius:20px; overflow:hidden; }
+  .vt-btn { background:transparent; border:none; color:var(--text-muted); padding:6px 14px; cursor:pointer; font-family:'Noto Sans JP',sans-serif; font-size:.72rem; transition:all .15s; }
+  .vt-btn.active { background:var(--accent); color:#fff; font-weight:700; }
+  .vt-btn:hover:not(.active) { background:var(--surface2); color:var(--text); }
+  header .view-toggle { border-color:rgba(255,255,255,.4); }
+  header .vt-btn { color:rgba(255,255,255,.8); }
+  header .vt-btn.active { background:#fff; color:var(--accent); }
+  header .vt-btn:hover:not(.active) { background:rgba(255,255,255,.2); color:#fff; }
+
+  /* ── Filters ── */
+  .filter-bar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:10px; }
+  .filter-label { font-family:'Noto Sans JP',sans-serif; font-size:.63rem; color:var(--text-muted); letter-spacing:.1em; text-transform:uppercase; margin-right:2px; }
+  .legend-item {
+    display:flex; align-items:center; gap:7px; font-size:.71rem; color:var(--text-muted);
+    cursor:pointer; padding:4px 12px; border-radius:3px; border:1.5px solid var(--border);
+    background:var(--surface); transition:all .15s; user-select:none;
+  }
+  .legend-item.dimmed { opacity:.35; }
+  .legend-pill { width:20px; height:5px; border-radius:3px; flex-shrink:0; }
+
+  .team-bar { display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-bottom:18px; }
+  .team-chip { font-size:.68rem; padding:4px 14px; border-radius:20px; border:1.5px solid var(--border); background:var(--surface); cursor:pointer; color:var(--text-muted); transition:all .15s; user-select:none; }
+  .team-chip.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .team-chip:not(.active):hover { border-color:var(--accent); color:var(--accent); }
+
+  /* ── WEEK VIEW ── */
+  .week-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; margin-bottom:28px; }
+  .day-col { background:var(--surface); border:1.5px solid var(--border); border-radius:12px; overflow:hidden; min-height:340px; display:flex; flex-direction:column; }
+  .day-col.today { border-color:var(--accent); }
+  .day-header { padding:10px 12px 8px; border-bottom:1.5px solid var(--border); background:var(--surface2); }
+  .day-col.today .day-header { background:#e4edf0; border-bottom-color:var(--accent); }
+  .day-name { font-family:'Noto Sans JP',sans-serif; font-size:.63rem; color:var(--text-muted); letter-spacing:.08em; text-transform:uppercase; }
+  .day-num { font-family:'Noto Sans JP',sans-serif; font-size:1.65rem; font-weight:700; line-height:1.05; margin-top:1px; }
+  .day-col.today .day-num { color:var(--accent); }
+  .day-count { font-family:'Noto Sans JP',sans-serif; font-size:.58rem; color:var(--text-muted); margin-top:2px; }
+  .day-events { padding:7px 7px 4px; flex:1; display:flex; flex-direction:column; gap:4px; overflow-y:auto; }
+
+  /* ── MONTH VIEW ── */
+  #monthView { display:none; margin-bottom:28px; }
+  .month-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:1px; background:var(--border); border:1.5px solid var(--border); border-radius:12px; overflow:hidden; }
+  .month-dayname { background:var(--surface2); padding:8px 0; text-align:center; font-family:'Noto Sans JP',sans-serif; font-size:.63rem; color:var(--text-muted); letter-spacing:.06em; }
+  .month-cell {
+    background:var(--surface); min-height:100px; padding:6px; display:flex; flex-direction:column; gap:3px; cursor:default;
+  }
+  .month-cell.other-month { background:#f3fafb; }
+  .month-cell.today { background:#e4edf0; }
+  .month-cell-num { font-family:'Noto Sans JP',sans-serif; font-size:1.1rem; font-weight:700; margin-bottom:2px; color:var(--text-muted); line-height:1; }
+  .month-cell.today .month-cell-num { color:var(--accent); }
+  .month-event {
+    border-radius:3px; padding:2px 6px; font-size:.62rem; font-weight:500; cursor:pointer;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:opacity .12s;
+  }
+  .month-event:hover { opacity:.8; }
+  .month-more { font-size:.6rem; color:var(--text-muted); font-family:'Noto Sans JP',sans-serif; padding:1px 4px; cursor:pointer; }
+  .month-more:hover { color:var(--accent); }
+  .month-add-btn { font-size:.6rem; color:var(--border); cursor:pointer; margin-top:auto; }
+  .month-add-btn:hover { color:var(--accent); }
+
+  /* ── Event Cards ── */
+  .event-card { border-radius:8px; padding:6px 9px; font-size:.69rem; border-left:3px solid transparent; cursor:pointer; transition:transform .12s, box-shadow .12s; position:relative; }
+  .event-card:hover { transform:translateX(2px); box-shadow:2px 2px 8px rgba(0,0,0,.07); }
+  .ev-cat { font-family:'Noto Sans JP',sans-serif; font-size:.57rem; opacity:.7; letter-spacing:.07em; text-transform:uppercase; margin-bottom:2px; }
+  .ev-title { font-weight:500; line-height:1.35; color:var(--text); }
+  .ev-team { font-size:.58rem; margin-top:3px; color:var(--text-muted); }
+  .event-card.is-span::after { content:'↔'; position:absolute; right:6px; top:6px; opacity:.35; font-size:.62rem; }
+  .event-card.hidden { display:none; }
+  .event-card.tentative { border-style:dashed; opacity:.75; }
+  .event-card.tentative .ev-title::after { content:' 〔仮〕'; font-size:.6rem; opacity:.7; font-weight:400; }
+  .month-event.tentative { border-left-style:dashed; opacity:.7; }
+  .c-campaign { background:var(--cat-campaign-soft); border-left-color:var(--cat-campaign); }
+  .c-launch   { background:var(--cat-launch-soft);   border-left-color:var(--cat-launch); }
+  .c-deadline { background:var(--cat-deadline-soft); border-left-color:var(--cat-deadline); }
+  .c-event    { background:var(--cat-event-soft);    border-left-color:var(--cat-event); }
+  .c-other    { background:var(--cat-other-soft);    border-left-color:var(--cat-other); }
+
+  .add-mini { background:transparent; border:1px dashed var(--border); color:var(--text-muted); border-radius:4px; width:100%; padding:4px; font-size:.66rem; cursor:pointer; transition:all .13s; margin-bottom:2px; }
+  .add-mini:hover { border-color:var(--accent); color:var(--accent); border-style:solid; }
+
+  /* ── Upcoming ── */
+  .upcoming-section { margin-bottom:28px; }
+  .upcoming-section h3 { font-family:'Noto Sans JP',sans-serif; font-size:.63rem; letter-spacing:.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:10px; display:flex; align-items:center; gap:10px; }
+  .upcoming-section h3::after { content:''; flex:1; height:1px; background:var(--border); }
+  .upcoming-list { display:flex; gap:8px; flex-wrap:wrap; }
+  .up-chip { background:var(--surface); border:1.5px solid var(--border); border-radius:4px; padding:6px 12px; font-size:.69rem; display:flex; align-items:center; gap:8px; cursor:pointer; transition:border-color .13s; }
+  .up-chip:hover { border-color:var(--accent); }
+  .up-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .up-date { font-family:'Noto Sans JP',sans-serif; color:var(--text-muted); font-size:.63rem; }
+
+  /* ── Modal base ── */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(26,24,20,.55); backdrop-filter:blur(3px); z-index:100; align-items:center; justify-content:center; }
+  .modal-overlay.open { display:flex; }
+  @keyframes up { from { transform:translateY(16px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+  .modal-box { background:var(--surface); border:1.5px solid var(--border); border-radius:16px; padding:28px; animation:up .2s ease; }
+  .modal-box h2 { font-family:'Noto Sans JP',sans-serif; font-size:1.25rem; color:var(--accent); margin-bottom:20px; border-bottom:1px solid var(--border); padding-bottom:11px; }
+  .form-row { margin-bottom:13px; }
+  .form-row label { display:block; font-size:.66rem; color:var(--text-muted); margin-bottom:4px; font-family:'Noto Sans JP',sans-serif; letter-spacing:.07em; text-transform:uppercase; }
+  .form-row input,.form-row select,.form-row textarea { width:100%; background:var(--surface2); border:1.5px solid var(--border); color:var(--text); border-radius:8px; padding:8px 11px; font-size:.8rem; font-family:'Noto Sans JP',sans-serif; outline:none; transition:border-color .13s; }
+  .form-row input:focus,.form-row select:focus,.form-row textarea:focus { border-color:var(--accent); }
+  .form-row textarea { resize:vertical; min-height:62px; }
+  .form-dates { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .modal-actions { display:flex; gap:9px; justify-content:flex-end; margin-top:20px; }
+  .btn-cancel { background:transparent; border:1.5px solid var(--border); color:var(--text-muted); padding:7px 18px; border-radius:20px; cursor:pointer; font-size:.76rem; transition:all .13s; }
+  .btn-cancel:hover { border-color:var(--accent); color:var(--accent); }
+  .btn-save { background:var(--accent); border:none; color:#fff; padding:7px 22px; border-radius:20px; cursor:pointer; font-size:.78rem; font-weight:600; transition:opacity .13s; }
+  .btn-save:hover { opacity:.85; }
+  .btn-delete { background:transparent; border:1.5px solid rgba(224,90,42,.3); color:var(--cat-campaign); padding:7px 15px; border-radius:20px; cursor:pointer; font-size:.74rem; transition:all .13s; }
+  .btn-delete:hover { background:var(--cat-campaign-soft); }
+
+  /* detail modal */
+  .detail-modal { width:430px; max-width:95vw; }
+  .d-cat-bar { height:4px; border-radius:2px; margin-bottom:14px; }
+  .d-cat-label { font-family:'Noto Sans JP',sans-serif; font-size:.63rem; letter-spacing:.1em; text-transform:uppercase; margin-bottom:5px; }
+  .d-title { font-family:'Noto Sans JP',sans-serif; font-size:1.25rem; font-weight:700; margin-bottom:7px; }
+  .d-dates { font-family:'Noto Sans JP',sans-serif; font-size:.71rem; color:var(--text-muted); margin-bottom:5px; }
+  .d-team { font-size:.7rem; color:var(--text-muted); margin-bottom:11px; }
+  .d-memo { font-size:.78rem; color:var(--text-muted); background:var(--surface2); border-radius:4px; padding:9px 12px; line-height:1.65; }
+  .d-gcal-btn { margin-top:12px; display:inline-flex; align-items:center; gap:7px; background:#1a73e8; color:#fff; border:none; border-radius:4px; padding:7px 16px; font-size:.74rem; cursor:pointer; transition:opacity .13s; }
+  .d-gcal-btn:hover { opacity:.88; }
+
+  /* add modal */
+  .add-modal { width:490px; max-width:95vw; }
+
+  /* CSV modal */
+  .csv-modal { width:520px; max-width:95vw; }
+  .csv-tabs { display:flex; gap:0; border:1.5px solid var(--border); border-radius:4px; overflow:hidden; margin-bottom:18px; }
+  .csv-tab { flex:1; background:transparent; border:none; color:var(--text-muted); padding:8px; cursor:pointer; font-family:'Noto Sans JP',sans-serif; font-size:.72rem; transition:all .14s; }
+  .csv-tab.active { background:var(--accent); color:#fff; }
+  .csv-pane { display:none; }
+  .csv-pane.active { display:block; }
+  .csv-template { background:var(--surface2); border-radius:4px; padding:12px; font-family:'Noto Sans JP',sans-serif; font-size:.65rem; color:var(--text-muted); line-height:1.8; margin-bottom:12px; white-space:pre-wrap; word-break:break-all; }
+  .csv-dropzone { border:2px dashed var(--border); border-radius:6px; padding:28px; text-align:center; cursor:pointer; transition:all .14s; margin-bottom:12px; }
+  .csv-dropzone:hover,.csv-dropzone.dragover { border-color:var(--accent); background:var(--surface2); }
+  .csv-dropzone p { font-size:.8rem; color:var(--text-muted); }
+  .csv-dropzone small { font-size:.68rem; color:var(--border); font-family:'Noto Sans JP',sans-serif; margin-top:6px; display:block; }
+  .csv-preview { max-height:180px; overflow-y:auto; margin-top:10px; }
+  .csv-preview-row { font-size:.68rem; padding:4px 8px; border-radius:3px; display:flex; gap:8px; align-items:center; }
+  .csv-preview-row:nth-child(odd) { background:var(--surface2); }
+  .import-result { font-size:.78rem; color:var(--cat-launch); background:rgba(42,122,90,.08); border-radius:4px; padding:8px 12px; margin-top:10px; display:none; }
+  .import-error { font-size:.78rem; color:var(--cat-campaign); background:var(--cat-campaign-soft); border-radius:4px; padding:8px 12px; margin-top:10px; display:none; }
+
+  /* Google Calendar modal */
+  .gcal-modal { width:500px; max-width:95vw; }
+  .gcal-step { display:flex; gap:12px; align-items:flex-start; margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid var(--border); }
+  .gcal-step:last-child { border-bottom:none; margin-bottom:0; }
+  .gcal-step-num { background:var(--accent); color:#fff; border-radius:50%; width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-family:'Noto Sans JP',sans-serif; font-size:.7rem; flex-shrink:0; margin-top:2px; }
+  .gcal-step-body h4 { font-size:.82rem; font-weight:600; margin-bottom:4px; }
+  .gcal-step-body p { font-size:.75rem; color:var(--text-muted); line-height:1.6; }
+  .gcal-link { color:#1a73e8; text-decoration:none; font-size:.75rem; display:inline-flex; align-items:center; gap:4px; margin-top:6px; }
+  .gcal-link:hover { text-decoration:underline; }
+  .gcal-ical-box { background:var(--surface2); border-radius:4px; padding:10px 13px; font-family:'Noto Sans JP',sans-serif; font-size:.65rem; color:var(--text-muted); margin-top:8px; word-break:break-all; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .gcal-copy-btn { background:var(--accent); color:#fff; border:none; border-radius:3px; padding:4px 12px; font-size:.66rem; cursor:pointer; white-space:nowrap; transition:opacity .13s; }
+  .gcal-copy-btn:hover { opacity:.82; }
+  .gcal-export-note { background:rgba(26,115,232,.08); border-radius:4px; padding:10px 13px; font-size:.73rem; color:#1a73e8; line-height:1.6; margin-top:8px; }
+
+  /* FAB */
+  .fab { position:fixed; bottom:28px; right:28px; background:var(--accent); color:#fff; border:none; border-radius:50%; width:52px; height:52px; font-size:1.5rem; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,.12); transition:transform .15s, box-shadow .15s; z-index:50; }
+  .fab:hover { transform:scale(1.1); box-shadow:0 4px 14px rgba(0,0,0,.16); }
+
+  ::-webkit-scrollbar { width:3px; }
+  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+  /* Toolbar */
+  .toolbar { display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap; }
+
+  @media (max-width:800px) {
+    .week-grid { grid-template-columns:repeat(4,1fr); }
+    .month-grid { grid-template-columns:repeat(7,1fr); }
+  }
+
+  /* ── Search ── */
+  .search-box { position:relative; display:flex; align-items:center; }
+  .search-input { background:var(--surface); border:1.5px solid var(--border); color:var(--text); border-radius:4px; padding:6px 11px 6px 28px; font-size:.75rem; font-family:'Noto Sans JP',sans-serif; outline:none; transition:border-color .13s, width .2s; width:170px; }
+  .search-input:focus { border-color:var(--accent); width:220px; }
+  .search-icon { position:absolute; left:9px; font-size:.68rem; color:var(--text-muted); pointer-events:none; }
+
+  /* ── Dashboard ── */
+  #dashboardView { display:none; margin-bottom:28px; }
+  .kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:22px; }
+  .kpi-card { background:var(--surface); border:1.5px solid var(--border); border-radius:6px; padding:16px 18px; }
+  .kpi-label { font-family:'Noto Sans JP',sans-serif; font-size:.63rem; letter-spacing:.1em; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px; }
+  .kpi-value { font-family:'Noto Sans JP',sans-serif; font-size:2.4rem; font-weight:700; line-height:1; color:var(--accent); }
+  .kpi-sub { font-size:.62rem; color:var(--text-muted); margin-top:4px; font-family:'Noto Sans JP',sans-serif; }
+  .dash-section { margin-bottom:22px; }
+  .dash-section-title { font-family:'Noto Sans JP',sans-serif; font-size:.63rem; letter-spacing:.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:10px; display:flex; align-items:center; gap:10px; }
+  .dash-section-title::after { content:''; flex:1; height:1px; background:var(--border); }
+  .dash-two-col { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:22px; }
+  .dash-three-col { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:22px; }
+  .dash-event-list { display:flex; flex-direction:column; gap:5px; }
+  .dash-event-row { background:var(--surface); border:1.5px solid var(--border); border-radius:5px; padding:8px 13px; display:flex; align-items:center; gap:10px; cursor:pointer; transition:border-color .13s; flex-wrap:wrap; }
+  .dash-event-row:hover { border-color:var(--accent); }
+  .dash-ev-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .dash-ev-title { font-size:.76rem; font-weight:500; flex:1; min-width:80px; }
+  .dash-ev-dates { font-family:'Noto Sans JP',sans-serif; font-size:.62rem; color:var(--text-muted); white-space:nowrap; }
+  .dash-ev-team { font-size:.62rem; color:var(--text-muted); white-space:nowrap; }
+  .dash-ev-cat { font-family:'Noto Sans JP',sans-serif; font-size:.58rem; padding:2px 7px; border-radius:10px; white-space:nowrap; }
+  .dash-tent-badge { font-size:.58rem; color:var(--cat-deadline); background:var(--cat-deadline-soft); padding:1px 6px; border-radius:8px; border:1px solid var(--cat-deadline); white-space:nowrap; flex-shrink:0; }
+
+  /* ── Timeline / Gantt ── */
+  .timeline-wrap { overflow-x:auto; border:1.5px solid var(--border); border-radius:6px; background:var(--surface); }
+  .timeline-inner { min-width:max-content; }
+  .timeline-header { display:flex; position:sticky; top:0; background:var(--surface2); border-bottom:1.5px solid var(--border); z-index:5; }
+  .tl-name-col { width:190px; min-width:190px; flex-shrink:0; padding:6px 11px; font-family:'Noto Sans JP',sans-serif; font-size:.58rem; color:var(--text-muted); letter-spacing:.07em; border-right:1.5px solid var(--border); }
+  .tl-days-row { display:flex; }
+  .tl-day-h { width:26px; min-width:26px; text-align:center; font-family:'Noto Sans JP',sans-serif; font-size:.52rem; color:var(--text-muted); padding:4px 0; border-right:1px solid var(--border); overflow:hidden; flex-shrink:0; }
+  .tl-day-h.tl-today { background:#fdf5f0; color:var(--cat-campaign); font-weight:700; }
+  .tl-day-h.tl-we { background:#f7f5f2; }
+  .timeline-row { display:flex; border-bottom:1px solid var(--border); min-height:30px; align-items:center; }
+  .timeline-row:last-child { border-bottom:none; }
+  .timeline-row:hover { background:#faf9f7; }
+  .tl-ev-name { width:190px; min-width:190px; flex-shrink:0; padding:4px 11px; font-size:.68rem; font-weight:500; border-right:1.5px solid var(--border); cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text); }
+  .tl-ev-name:hover { color:var(--accent); }
+  .tl-cells { display:flex; position:relative; align-items:center; }
+  .tl-cell { width:26px; min-width:26px; height:30px; border-right:1px solid var(--border); flex-shrink:0; }
+  .tl-cell.tl-today { background:rgba(192,90,42,.06); }
+  .tl-cell.tl-we { background:#faf9f7; }
+  .tl-bar { position:absolute; height:18px; top:6px; border-radius:3px; cursor:pointer; display:flex; align-items:center; padding:0 5px; overflow:hidden; white-space:nowrap; font-size:.58rem; font-weight:600; color:#fff; transition:opacity .13s; }
+  .tl-bar:hover { opacity:.8 !important; }
+  .tl-bar.tl-tent { background:transparent !important; border-width:1.5px; border-style:dashed; }
+
+  /* ── KPI Channel Cards ── */
+  .kpi-ch-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .kpi-ch-card { background:var(--surface); border:1.5px solid var(--border); border-radius:6px; overflow:hidden; }
+  .kpi-ch-head { padding:9px 13px; display:flex; align-items:center; justify-content:space-between; }
+  .kpi-ch-name { font-family:'Noto Sans JP',sans-serif; font-size:.95rem; font-weight:700; letter-spacing:.03em; }
+  .kpi-ch-badge { font-size:.95rem; font-weight:700; padding:3px 11px; border-radius:10px; }
+  .kpi-metric { display:flex; align-items:center; gap:8px; padding:6px 13px; border-top:1px solid var(--border); }
+  .kpi-metric-lbl { color:var(--text-muted); flex:1; font-size:.64rem; font-family:'Noto Sans JP',sans-serif; text-transform:uppercase; letter-spacing:.04em; }
+  .kpi-metric-val { font-size:.71rem; font-weight:600; color:var(--text); }
+  .kpi-metric-rate { font-weight:700; padding:3px 10px; border-radius:8px; font-size:.85rem; white-space:nowrap; }
+  .kpi-setup-hint { background:var(--surface); border:1.5px dashed var(--border); border-radius:6px; padding:18px; font-size:.75rem; color:var(--text-muted); cursor:pointer; transition:border-color .13s; text-align:center; }
+  .kpi-setup-hint:hover { border-color:var(--accent); color:var(--accent); }
+  .kpi-status-bar { font-size:.72rem; color:var(--text-muted); padding:10px 0; }
+
+  @media (max-width:800px) {
+    .kpi-grid { grid-template-columns:repeat(2,1fr); }
+    .dash-two-col { grid-template-columns:1fr; }
+    .dash-three-col { grid-template-columns:1fr; }
+    .tl-name-col, .tl-ev-name { width:110px; min-width:110px; }
+    .kpi-ch-grid { grid-template-columns:repeat(2,1fr); }
+  }
+  @media (max-width:500px) {
+    .kpi-ch-grid { grid-template-columns:1fr; }
+  }
+
+  /* ── Password Lock ── */
+  #pwLock { position:fixed; inset:0; background:var(--accent); display:flex; align-items:center; justify-content:center; z-index:9999; }
+  #pwBox { background:var(--surface); border:none; border-radius:20px; padding:40px 48px; text-align:center; width:320px; box-shadow:0 12px 48px rgba(0,0,0,.15); }
+  #pwBox h2 { font-size:1.1rem; font-weight:700; color:var(--accent); margin-bottom:6px; }
+  #pwBox p { font-size:.75rem; color:var(--text-muted); margin-bottom:24px; }
+  #pwInput { width:100%; background:var(--surface2); border:1.5px solid var(--border); border-radius:10px; padding:10px 14px; font-size:.9rem; font-family:'Noto Sans JP',sans-serif; color:var(--text); outline:none; margin-bottom:12px; text-align:center; letter-spacing:.1em; }
+  #pwInput:focus { border-color:var(--accent); }
+  #pwBtn { width:100%; background:var(--accent); color:#fff; border:none; border-radius:10px; padding:11px; font-size:.85rem; font-family:'Noto Sans JP',sans-serif; cursor:pointer; font-weight:700; box-shadow:0 4px 14px rgba(27,189,212,.4); }
+  #pwBtn:hover { opacity:.88; }
+  #pwErr { font-size:.72rem; color:#c0392b; margin-top:10px; min-height:1em; }
+</style>
+</head>
+<body>
+
+<div id="pwLock">
+  <div id="pwBox">
+    <h2>Brand Calendar</h2>
+    <p>パスワードを入力してください</p>
+    <input id="pwInput" type="password" placeholder="password" autocomplete="off">
+    <button id="pwBtn" onclick="checkPW()">ログイン</button>
+    <div id="pwErr"></div>
+  </div>
+</div>
+<script>
+(function(){
+  if(sessionStorage.getItem('bc_auth')==='1'||!location.hostname.includes('github.io')){
+    document.getElementById('pwLock').style.display='none';
+  }
+  document.getElementById('pwInput').addEventListener('keydown',function(e){
+    if(e.key==='Enter') checkPW();
+  });
+})();
+function checkPW(){
+  const v=document.getElementById('pwInput').value;
+  if(v==='yogibo2026'){
+    sessionStorage.setItem('bc_auth','1');
+    document.getElementById('pwLock').style.display='none';
+  } else {
+    document.getElementById('pwErr').textContent='パスワードが違います';
+    document.getElementById('pwInput').value='';
+    document.getElementById('pwInput').focus();
+  }
+}
+</script>
+
+<div class="app-wrap">
+<header>
+  <div class="header-left">
+    <h1>Brand Strategy</h1>
+    <p id="weekRange">—</p>
+  </div>
+  <div class="header-right">
+    <div class="view-toggle">
+      <button class="vt-btn active" id="vtWeek" onclick="switchView('week')">7日</button>
+      <button class="vt-btn" id="vtMonth" onclick="switchView('month')">月表示</button>
+      <button class="vt-btn" id="vtTimeline" onclick="switchView('timeline')">タイムライン</button>
+      <button class="vt-btn" id="vtDash" onclick="switchView('dashboard')">ダッシュボード</button>
+    </div>
+    <button class="nav-btn" id="prevBtn" onclick="shiftPeriod(-1)">← 前</button>
+    <div class="date-label" id="periodLabel">—</div>
+    <button class="nav-btn" id="nextBtn" onclick="shiftPeriod(1)">次 →</button>
+    <button class="nav-btn today-btn" onclick="goToday()">TODAY</button>
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" id="searchInput" placeholder="イベントを検索..." oninput="onSearch(this.value)">
+    </div>
+    <button class="nav-btn" onclick="openCSVModal()">CSV</button>
+    <button class="nav-btn gcal" onclick="openGCalModal()">📅 Google連携</button>
+  </div>
+</header>
+
+<!-- Sheet Status Bar -->
+<div style="display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1.5px solid var(--border);border-radius:5px;padding:7px 14px;margin-bottom:14px;gap:12px;flex-wrap:wrap;">
+  <span id="sheetStatus" style="font-size:.72rem;font-family:'Noto Sans JP',sans-serif;color:var(--text-muted);" onclick="if(sheetStatus==='unconfigured')openSheetSetupModal()">スプレッドシート未設定</span>
+  <div style="display:flex;gap:8px;">
+    <button class="nav-btn" style="font-size:.68rem;padding:4px 12px;" onclick="loadFromSheetDynamic()">🔄 シートを再読み込み</button>
+    <button class="nav-btn" style="font-size:.68rem;padding:4px 12px;border-color:var(--cat-deadline);color:var(--cat-deadline);" onclick="openSheetSetupModal()">⚙ シート設定</button>
+  </div>
+</div>
+
+<!-- Category Filter -->
+<div class="filter-bar">
+  <span class="filter-label">カテゴリ</span>
+  <div class="legend-item" data-cat="all" onclick="filterCat('all',this)"><span class="legend-pill" style="background:#aaa8a2"></span>すべて</div>
+  <div class="legend-item" data-cat="campaign" onclick="filterCat('campaign',this)"><span class="legend-pill" style="background:var(--cat-campaign)"></span>Campaign</div>
+  <div class="legend-item" data-cat="launch" onclick="filterCat('launch',this)"><span class="legend-pill" style="background:var(--cat-launch)"></span>新商品発売</div>
+  <div class="legend-item" data-cat="deadline" onclick="filterCat('deadline',this)"><span class="legend-pill" style="background:var(--cat-deadline)"></span>締め切り・承認</div>
+  <div class="legend-item" data-cat="event" onclick="filterCat('event',this)"><span class="legend-pill" style="background:var(--cat-event)"></span>イベント・施策</div>
+  <div class="legend-item" data-cat="other" onclick="filterCat('other',this)"><span class="legend-pill" style="background:var(--cat-other)"></span>その他</div>
+</div>
+<!-- Team Filter -->
+<div class="team-bar">
+  <span class="filter-label">チーム</span>
+  <div class="team-chip active" data-team="all" onclick="filterTeam('all',this)">すべて</div>
+  <div class="team-chip" data-team="promo" onclick="filterTeam('promo',this)">プロモーション</div>
+  <div class="team-chip" data-team="sponsor" onclick="filterTeam('sponsor',this)">協賛</div>
+  <div class="team-chip" data-team="ad" onclick="filterTeam('ad',this)">広告</div>
+  <div class="team-chip" data-team="ec" onclick="filterTeam('ec',this)">EC</div>
+  <div class="team-chip" data-team="design" onclick="filterTeam('design',this)">デザイン</div>
+  <div class="team-chip" data-team="vmd" onclick="filterTeam('vmd',this)">VMD</div>
+</div>
+
+<!-- Week View -->
+<div id="weekView">
+  <div class="week-grid" id="weekGrid"></div>
+</div>
+
+<!-- Month View -->
+<div id="monthView">
+  <div class="month-grid" id="monthGrid"></div>
+</div>
+
+<!-- Dashboard View -->
+<div id="dashboardView"></div>
+<div id="timelineView" style="display:none"></div>
+
+<!-- 近日スタート（週・月共通） -->
+<div class="upcoming-section">
+  <h3>近日スタート</h3>
+  <div class="upcoming-list" id="upcomingList"></div>
+</div>
+
+<button class="fab" onclick="openAddModal(null)" title="イベント追加">＋</button>
+
+<!-- ── Add Modal ── -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal-box add-modal">
+    <h2>イベントを追加</h2>
+    <div class="form-row">
+      <label>タイトル</label>
+      <input type="text" id="ev-title" placeholder="例：春の新作キャンペーン">
+    </div>
+    <div class="form-row form-dates">
+      <div><label>開始日</label><input type="date" id="ev-start"></div>
+      <div><label>終了日（省略可）</label><input type="date" id="ev-end"></div>
+    </div>
+    <div class="form-row">
+      <label>カテゴリ</label>
+      <select id="ev-type">
+        <option value="campaign">📅 Campaign</option>
+        <option value="launch">🛍 新商品発売</option>
+        <option value="deadline">⏰ 締め切り・承認日</option>
+        <option value="event">🎯 イベント・施策</option>
+        <option value="other">📌 その他</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>担当チーム</label>
+      <select id="ev-team">
+        <option value="all">全チーム</option>
+        <option value="promo">プロモーション</option>
+        <option value="sponsor">協賛</option>
+        <option value="ad">広告</option>
+        <option value="ec">EC</option>
+        <option value="design">デザイン</option>
+        <option value="vmd">VMD</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>メモ</label>
+      <textarea id="ev-memo" placeholder="内容、担当者、リンクなど"></textarea>
+    </div>
+    <div class="form-row" style="display:flex;align-items:center;gap:10px;">
+      <input type="checkbox" id="ev-tentative" style="width:16px;height:16px;cursor:pointer;accent-color:var(--cat-deadline);">
+      <label style="font-size:.78rem;color:var(--text);cursor:pointer;margin:0;" for="ev-tentative">未確定（〔仮〕として表示）</label>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModals()">キャンセル</button>
+      <button class="btn-save" onclick="saveEvent()">保存する</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Detail Modal ── -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal-box detail-modal">
+    <div class="d-cat-bar" id="d-bar"></div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+      <div class="d-cat-label" id="d-cat"></div>
+      <span id="d-tentative-badge" style="display:none;background:var(--cat-deadline-soft);color:var(--cat-deadline);font-size:.62rem;font-family:'Noto Sans JP',sans-serif;padding:2px 8px;border-radius:10px;border:1px solid var(--cat-deadline);">〔仮〕未確定</span>
+    </div>
+    <div class="d-title" id="d-title"></div>
+    <div class="d-dates" id="d-dates"></div>
+    <div class="d-team" id="d-team"></div>
+    <div class="d-memo" id="d-memo" style="display:none"></div>
+    <div id="d-sheet-badge" style="display:none;margin-top:10px;font-size:.7rem;color:var(--cat-launch);background:rgba(42,122,90,.08);border-radius:4px;padding:6px 10px;"></div>
+    <button class="d-gcal-btn" id="d-gcal-btn" onclick="addToGCalSingle()">📅 Googleカレンダーに追加</button>
+    <div class="modal-actions">
+      <button class="btn-delete" onclick="deleteEvent()">削除</button>
+      <button class="btn-cancel" style="border-color:var(--accent);color:var(--accent);" onclick="openEditModal()">✏️ 編集</button>
+      <button class="btn-cancel" onclick="closeModals()">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Edit Modal ── -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal-box add-modal">
+    <h2>イベントを編集</h2>
+    <div class="form-row">
+      <label>タイトル</label>
+      <input type="text" id="edit-title">
+    </div>
+    <div class="form-row form-dates">
+      <div><label>開始日</label><input type="date" id="edit-start"></div>
+      <div><label>終了日</label><input type="date" id="edit-end"></div>
+    </div>
+    <div class="form-row">
+      <label>カテゴリ</label>
+      <select id="edit-type">
+        <option value="campaign">📅 Campaign</option>
+        <option value="launch">🛍 新商品発売</option>
+        <option value="deadline">⏰ 締め切り・承認日</option>
+        <option value="event">🎯 イベント・施策</option>
+        <option value="other">📌 その他</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>担当チーム</label>
+      <select id="edit-team">
+        <option value="all">全チーム</option>
+        <option value="promo">プロモーション</option>
+        <option value="sponsor">協賛</option>
+        <option value="ad">広告</option>
+        <option value="ec">EC</option>
+        <option value="design">デザイン</option>
+        <option value="vmd">VMD</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>メモ</label>
+      <textarea id="edit-memo"></textarea>
+    </div>
+    <div class="form-row" style="display:flex;align-items:center;gap:10px;">
+      <input type="checkbox" id="edit-tentative" style="width:16px;height:16px;cursor:pointer;accent-color:var(--cat-deadline);">
+      <label style="font-size:.78rem;color:var(--text);cursor:pointer;margin:0;" for="edit-tentative">未確定（〔仮〕として表示）</label>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModals()">キャンセル</button>
+      <button class="btn-save" onclick="updateEvent()">更新する</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── CSV Modal ── -->
+<div class="modal-overlay" id="csvModal">
+  <div class="modal-box csv-modal">
+    <h2>CSV インポート / エクスポート</h2>
+    <div class="csv-tabs">
+      <button class="csv-tab active" onclick="switchCSVTab('import',this)">インポート</button>
+      <button class="csv-tab" onclick="switchCSVTab('export',this)">エクスポート</button>
+    </div>
+
+    <!-- Import pane -->
+    <div class="csv-pane active" id="csv-import-pane">
+      <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:12px;line-height:1.65;">
+        以下の形式のCSVファイルをアップロードしてください。<br>Excelで作成する場合は「名前を付けて保存」→「CSV UTF-8」を選択してください。
+      </p>
+      <div class="csv-template">title,start,end,type,team,memo
+春の新作キャンペーン,2025-04-01,2025-04-15,campaign,promo,全媒体連動
+限定コレクション発売,2025-04-05,2025-04-05,launch,ec,公式サイト
+協賛ロゴ承認締め切り,2025-04-08,,deadline,sponsor,A社確認</div>
+      <p style="font-size:.68rem;color:var(--text-muted);margin-bottom:10px;font-family:'Noto Sans JP',sans-serif;">
+        type: campaign / launch / deadline / event / other<br>
+        team: promo / sponsor / ad / ec / design / vmd
+      </p>
+      <div class="csv-dropzone" id="csvDropzone" onclick="document.getElementById('csvFileInput').click()">
+        <p>クリックまたはドラッグ＆ドロップ</p>
+        <small>CSVファイル (.csv)</small>
+      </div>
+      <input type="file" id="csvFileInput" accept=".csv" style="display:none" onchange="handleCSVFile(this.files[0])">
+      <div class="csv-preview" id="csvPreview"></div>
+      <div class="import-result" id="importResult"></div>
+      <div class="import-error" id="importError"></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeModals()">閉じる</button>
+        <button class="btn-save" id="importConfirmBtn" style="display:none" onclick="confirmImport()">インポート実行</button>
+      </div>
+    </div>
+
+    <!-- Export pane -->
+    <div class="csv-pane" id="csv-export-pane">
+      <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:16px;line-height:1.65;">
+        現在登録されているすべてのイベントをCSVでダウンロードします。<br>Excelで開く場合はファイルを開く際に文字コード「UTF-8」を選択してください。
+      </p>
+      <div style="background:var(--surface2);border-radius:6px;padding:16px;margin-bottom:16px;">
+        <div style="font-size:.78rem;font-weight:600;margin-bottom:8px;">エクスポート内容</div>
+        <div style="font-size:.74rem;color:var(--text-muted)" id="exportSummary">—</div>
+      </div>
+      <div class="gcal-export-note">
+        💡 エクスポートしたCSVはそのままインポートにも使えます。チームで共有する際は、このCSVをSlackやメールで送付してください。
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeModals()">閉じる</button>
+        <button class="btn-save" onclick="exportCSV()">📥 CSVをダウンロード</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Sheet Setup Modal ── -->
+<div class="modal-overlay" id="sheetSetupModal">
+  <div class="modal-box" style="width:560px;max-width:95vw;">
+    <h2>📊 Googleスプレッドシート設定</h2>
+
+    <div style="background:var(--surface2);border-radius:6px;padding:16px;margin-bottom:18px;font-size:.78rem;line-height:1.9;color:var(--text-muted);">
+      <strong style="color:var(--text);font-size:.82rem;">手順（5分でできます）</strong><br>
+      <strong style="color:var(--text);">① スプレッドシートを用意する</strong><br>
+      Googleドライブで新しいスプレッドシートを作成し、<br>
+      1行目に次の見出しを入力してください：<br>
+      <code style="background:var(--border);padding:2px 7px;border-radius:3px;font-family:'Noto Sans JP',sans-serif;font-size:.72rem;">title, start, end, type, team, memo</code><br><br>
+      <strong style="color:var(--text);">② データを入力する</strong><br>
+      2行目以降にイベントを入力します。<br>
+      type は <code style="background:var(--border);padding:1px 5px;border-radius:3px;font-size:.7rem;">campaign / launch / deadline / event / other</code><br>
+      team は <code style="background:var(--border);padding:1px 5px;border-radius:3px;font-size:.7rem;">promo / sponsor / ad / ec / design / vmd</code><br><br>
+      <strong style="color:var(--text);">③ ウェブに公開する</strong><br>
+      ファイル → 共有 → 「ウェブに公開」→ シート1・CSV形式を選択 → 「公開」<br>
+      表示されたURLをコピーしてください<br><br>
+      <strong style="color:var(--text);">④ 下にURLを貼り付けて「保存」</strong>
+    </div>
+
+    <div class="form-row">
+      <label>イベントシート 公開URL（CSV形式）</label>
+      <input type="text" id="sheetUrlInput" placeholder="https://docs.google.com/spreadsheets/d/XXXX/pub?output=csv">
+    </div>
+
+    <div id="sheetTestResult" style="display:none;margin-top:10px;font-size:.76rem;border-radius:4px;padding:8px 12px;"></div>
+
+    <hr style="border:none;border-top:1px solid var(--border);margin:18px 0 14px;">
+    <div style="font-size:.8rem;font-weight:600;color:var(--text);margin-bottom:6px;">📊 KPIダッシュボード設定（任意）</div>
+    <div style="background:var(--surface2);border-radius:5px;padding:10px 13px;font-size:.75rem;color:var(--text-muted);line-height:1.85;">
+      同じスプレッドシートに「<strong style="color:var(--text)">KPI</strong>」という名前のシートを追加し、列を作成してください：<br>
+      <code style="background:var(--border);padding:1px 6px;border-radius:3px;font-family:'Noto Sans JP',sans-serif;font-size:.7rem;">channel, label, target, actual, yoy</code><br>
+      例：<code style="font-family:'Noto Sans JP',sans-serif;font-size:.68rem;">Shopify, 売上, 58532500, 69404890, 124</code><br><br>
+      次に GAS コード（doGet 関数）に <strong style="color:var(--text)">KPI対応コードを追記</strong> して再デプロイしてください。<br>
+      上の「イベントシート URL」と同じエンドポイントを自動的に使用します。追加のURL設定は不要です。
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModals()">キャンセル</button>
+      <button class="nav-btn primary" style="padding:8px 18px;font-size:.78rem;" onclick="testSheetURL()">接続テスト</button>
+      <button class="btn-save" onclick="saveSheetURL()">保存して読み込む</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Sheet Setup Modal ──
+function openSheetSetupModal(){
+  const saved=localStorage.getItem('bs3_sheet_url')||'';
+  document.getElementById('sheetUrlInput').value=saved;
+  document.getElementById('sheetTestResult').style.display='none';
+  document.getElementById('sheetSetupModal').classList.add('open');
+}
+
+async function testSheetURL(){
+  const url=document.getElementById('sheetUrlInput').value.trim();
+  const el=document.getElementById('sheetTestResult');
+  if(!url){ el.style.display='block'; el.style.background='var(--cat-campaign-soft)'; el.style.color='var(--cat-campaign)'; el.textContent='URLを入力してください'; return; }
+  el.style.display='block'; el.style.background='var(--surface2)'; el.style.color='var(--text-muted)'; el.textContent='🔄 接続確認中…';
+  try{
+    const res=await fetch(url);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const json=await res.json();
+    const count=Array.isArray(json)?json.filter(r=>r.title).length:0;
+    el.style.background='rgba(42,122,90,.1)'; el.style.color='var(--cat-launch)';
+    el.textContent=`✅ 接続成功！ ${count}件のイベントが見つかりました。`;
+  } catch(e){
+    el.style.background='var(--cat-campaign-soft)'; el.style.color='var(--cat-campaign)';
+    el.textContent=`⚠️ 接続失敗：${e.message} — URLを確認するか、スプレッドシートが「ウェブに公開」されているか確認してください。`;
+  }
+}
+
+async function saveSheetURL(){
+  const url=document.getElementById('sheetUrlInput').value.trim();
+  if(!url){ alert('URLを入力してください'); return; }
+  localStorage.setItem('bs3_sheet_url',url);
+  window._sheetURL=url;
+  closeModals();
+  await Promise.all([loadFromSheetDynamic(), loadKPIData()]);
+}
+
+async function loadFromSheetDynamic(){
+  const url=window._sheetURL||localStorage.getItem('bs3_sheet_url')||SHEET_CSV_URL;
+  if(!url){ sheetStatus='unconfigured'; updateSheetStatusUI(); window._sheetsEvents=[]; return; }
+  sheetStatus='loading'; updateSheetStatusUI();
+  try{
+    const res=await fetch(url);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const json=await res.json();
+    // Apps Script が返すJSON配列をイベント形式に変換
+    window._sheetsEvents=json.map((row,i)=>({
+      id:'S'+Math.random().toString(36).slice(2,9),
+      title:String(row.title||'').trim(),
+      start:formatDateValue(row.start),
+      end:formatDateValue(row.end||row.start),
+      type:VALID_TYPES.includes(String(row.type||'').trim())?String(row.type).trim():'other',
+      team:VALID_TEAMS.includes(String(row.team||'').trim())?String(row.team).trim():'all',
+      memo:String(row.memo||'').trim(),
+      tentative:row.tentative===true||String(row.tentative||'').toUpperCase()==='TRUE',
+      _fromSheet:true,
+      _row:i+2,
+    })).filter(e=>e.title&&e.start);
+    sheetStatus='ok';
+  } catch(e){
+    console.warn('Sheet load failed:',e);
+    window._sheetsEvents=[];
+    sheetStatus='error';
+  }
+  updateSheetStatusUI();
+  render();
+}
+
+// Googleスプレッドシートの日付はDate型やスラッシュ形式で来ることがあるので正規化
+function formatDateValue(val){
+  if(!val) return '';
+  const s=String(val).trim();
+  if(!s||s==='null'||s==='undefined') return '';
+  // すでに YYYY-MM-DD 形式
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  // スラッシュ区切り: 2026/1/12 や 2026/01/12
+  const slash=s.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
+  if(slash) return `${slash[1]}-${slash[2].padStart(2,'0')}-${slash[3].padStart(2,'0')}`;
+  // MM/DD/YYYY 形式
+  const us=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if(us) return `${us[3]}-${us[1].padStart(2,'0')}-${us[2].padStart(2,'0')}`;
+  // Apps Scriptが返すDate文字列: "Mon Mar 16 2026 00:00:00 GMT+0900 (JST)" など
+  const d=new Date(s);
+  if(!isNaN(d.getTime())){
+    // タイムゾーンずれを防ぐためUTCではなくローカル日付で取得
+    const y=d.getFullYear();
+    const m=String(d.getMonth()+1).padStart(2,'0');
+    const day=String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
+  }
+  return s;
+}
+</script>
+<div class="modal-overlay" id="gcalModal">
+  <div class="modal-box gcal-modal">
+    <h2>📅 Google カレンダー連携</h2>
+
+    <div class="gcal-step">
+      <div class="gcal-step-num">1</div>
+      <div class="gcal-step-body">
+        <h4>個別にGoogleカレンダーへ追加する</h4>
+        <p>イベント詳細画面を開いて「Googleカレンダーに追加」ボタンを押すと、そのイベントをGoogleカレンダーに直接登録できます。</p>
+      </div>
+    </div>
+
+    <div class="gcal-step">
+      <div class="gcal-step-num">2</div>
+      <div class="gcal-step-body">
+        <h4>全イベントをまとめてGoogleカレンダーに追加</h4>
+        <p>以下のボタンで全イベントのGoogleカレンダー追加リンクを一括生成します。</p>
+        <button class="nav-btn primary" style="margin-top:10px" onclick="bulkAddToGCal()">全イベントをGoogleカレンダーに追加</button>
+        <div id="gcalBulkResult" style="margin-top:10px;display:none;"></div>
+      </div>
+    </div>
+
+    <div class="gcal-step">
+      <div class="gcal-step-num">3</div>
+      <div class="gcal-step-body">
+        <h4>iCal（.ics）でGoogleカレンダーに一括インポート</h4>
+        <p>iCalファイルをダウンロードして、Googleカレンダーの「他のカレンダーをインポート」から取り込めます。すべてのイベントを一度に追加できる最も確実な方法です。</p>
+        <button class="nav-btn primary" style="margin-top:10px" onclick="downloadICS()">📥 .ics ファイルをダウンロード</button>
+        <div class="gcal-export-note" style="margin-top:10px;">
+          <strong>Googleカレンダーへのインポート手順：</strong><br>
+          1. 上のボタンで .ics ファイルをダウンロード<br>
+          2. Googleカレンダーを開く（PC版）<br>
+          3. 設定（⚙）→「インポート／エクスポート」→「インポート」<br>
+          4. ダウンロードした .ics ファイルを選択して「インポート」
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModals()">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Constants ──
+const CATS = {
+  campaign:{ label:'Campaign', icon:'📅', color:'#c05a2a' },
+  launch:  { label:'新商品発売',     icon:'🛍', color:'#2a7a5a' },
+  deadline:{ label:'締め切り・承認日', icon:'⏰', color:'#6a3a8a' },
+  event:   { label:'イベント・施策',   icon:'🎯', color:'#2a5a8a' },
+  other:   { label:'その他',           icon:'📌', color:'#7a6a4a' },
+};
+const TEAMS = { all:'全チーム', promo:'プロモーション', sponsor:'協賛', ad:'広告', ec:'EC', design:'デザイン', vmd:'VMD' };
+const VALID_TYPES = Object.keys(CATS);
+const VALID_TEAMS = Object.keys(TEAMS);
+
+// キャンペーンごとの固有カラー（タイトルハッシュ → パレット）
+const CAMPAIGN_PALETTE = [
+  '#e05a2a','#d63384','#7c3aed','#2563eb','#0d9488',
+  '#16a34a','#d97706','#e11d48','#0891b2','#4f46e5',
+  '#b45309','#059669','#9333ea','#0284c7','#c2410c',
+];
+function campaignColor(title){
+  if(!title) return CAMPAIGN_PALETTE[0];
+  let h=0;
+  for(let i=0;i<title.length;i++){ h=((h<<5)-h)+title.charCodeAt(i); h|=0; }
+  return CAMPAIGN_PALETTE[Math.abs(h)%CAMPAIGN_PALETTE.length];
+}
+function evColor(ev){ return ev.type==='campaign'?campaignColor(ev.title):CATS[ev.type].color; }
+const DAY_NAMES = ['日','月','火','水','木','金','土'];
+const MONTH_NAMES = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+
+// ── State ──
+let offset = 0;
+let currentView = 'week';
+let activeCat = 'all';
+let activeTeam = 'all';
+let selectedId = null;
+let pendingImport = [];
+let searchQuery = '';
+
+// ── Google Sheets 設定 ──
+// ★ STEP 1: ここにGoogleスプレッドシートの「公開URL」を貼り付ける
+// 取得方法: スプレッドシート → ファイル → 共有 → ウェブに公開 → CSV形式のURLをコピー
+const SHEET_CSV_URL = 'https://script.google.com/macros/s/AKfycbwPYXF2z-UJKkOEA2pxP_UQaw7LX-UY30Q5Q_l9agxIim4iMtSbQzfq2hERtDgJVQcB/exec';
+
+// ── Storage ──
+// sheetsEvents = Googleスプレッドシートから読み込んだイベント（読み取り専用）
+// localEvents  = このカレンダー上で手動追加したイベント（ローカル保存）
+function loadLocalEvents(){ try{ return JSON.parse(localStorage.getItem('bs3_local')||'[]'); }catch{ return []; } }
+function saveLocalEvents(e){ localStorage.setItem('bs3_local', JSON.stringify(e)); }
+function loadEvents(){ return [...(window._sheetsEvents||[]), ...loadLocalEvents()]; }
+function saveEvents(e){
+  // ローカル追加分だけ保存（シートから来たものは除く）
+  const sheetIds=new Set((window._sheetsEvents||[]).map(x=>x.id));
+  saveLocalEvents(e.filter(x=>!sheetIds.has(x.id)));
+}
+function uid(){ return 'L'+Math.random().toString(36).slice(2,9); }
+
+// ── Google Sheets 読み込み ──
+let sheetStatus = 'idle'; // idle | loading | ok | error | unconfigured
+
+function parseSheetCSV(text){
+  const lines=text.trim().split(/\r?\n/);
+  if(lines.length<2) return [];
+  const header=lines[0].split(',').map(h=>h.trim().replace(/^"|"$/g,'').toLowerCase());
+  const ti=header.indexOf('title'), si=header.indexOf('start'), ei=header.indexOf('end');
+  const tyi=header.indexOf('type'), tmi=header.indexOf('team'), mi=header.indexOf('memo');
+  if(ti<0||si<0) return [];
+  const results=[];
+  for(let i=1;i<lines.length;i++){
+    if(!lines[i].trim()) continue;
+    const cols=splitCSVLine(lines[i]);
+    const title=(cols[ti]||'').trim();
+    const start=(cols[si]||'').trim();
+    if(!title||!start) continue;
+    const end=(ei>=0?(cols[ei]||'').trim():'')||start;
+    const type=(tyi>=0?(cols[tyi]||'').trim():'other');
+    const team=(tmi>=0?(cols[tmi]||'').trim():'all');
+    const memo=(mi>=0?(cols[mi]||'').trim():'');
+    const validType=VALID_TYPES.includes(type)?type:'other';
+    const validTeam=VALID_TEAMS.includes(team)?team:'all';
+    results.push({id:'S'+Math.random().toString(36).slice(2,9), title, start, end, type:validType, team:validTeam, memo, _fromSheet:true});
+  }
+  return results;
+}
+
+async function loadFromSheet(){
+  if(!SHEET_CSV_URL){
+    sheetStatus='unconfigured';
+    updateSheetStatusUI();
+    window._sheetsEvents=[];
+    return;
+  }
+  sheetStatus='loading';
+  updateSheetStatusUI();
+  try{
+    const res=await fetch(SHEET_CSV_URL);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const text=await res.text();
+    window._sheetsEvents=parseSheetCSV(text);
+    sheetStatus='ok';
+  } catch(e){
+    console.warn('Sheet load failed:',e);
+    window._sheetsEvents=[];
+    sheetStatus='error';
+  }
+  updateSheetStatusUI();
+  render();
+}
+
+function updateSheetStatusUI(){
+  const el=document.getElementById('sheetStatus');
+  if(!el) return;
+  const msgs={
+    idle:         {text:'—',                              color:'var(--text-muted)'},
+    loading:      {text:'🔄 スプレッドシート読み込み中…',  color:'var(--text-muted)'},
+    ok:           {text:`✅ スプレッドシート連携中 （${(window._sheetsEvents||[]).length}件）`, color:'var(--cat-launch)'},
+    error:        {text:'⚠️ 読み込み失敗 — URLを確認してください', color:'var(--cat-campaign)'},
+    unconfigured: {text:'📋 スプレッドシート未設定 — 設定方法はこちら', color:'var(--cat-deadline)'},
+  };
+  const m=msgs[sheetStatus]||msgs.idle;
+  el.textContent=m.text;
+  el.style.color=m.color;
+  if(sheetStatus==='unconfigured') el.style.cursor='pointer';
+}
+
+function initSamples(){
+  // ローカルデータが空かつシートも未設定の場合のみフォールバックデータを入れる
+  if(SHEET_CSV_URL) return;
+  if(loadLocalEvents().length>0) return;
+  saveLocalEvents([
+    {id:uid(),title:'LUCKY NEW YEAR',        team:'ec',    type:'campaign', start:'2025-12-26',end:'2026-01-12',memo:'Store:2025/12/26〜2026/1/12 EC:2025/12/26 9:00〜'},
+    {id:uid(),title:'バレンタイン',            team:'promo', type:'event',    start:'2026-02-01',end:'2026-02-14',memo:'キャンペーンではなく施策。EC期間なし'},
+    {id:uid(),title:'新生活応援キャンペーン',   team:'ec',    type:'campaign', start:'2026-02-13',end:'2026-03-15',memo:'Store:2/13〜3/15 EC:2/13 9:00〜3/16頃'},
+    {id:uid(),title:'ヨギメンテウィーク',       team:'promo', type:'campaign', start:'2026-03-16',end:'2026-03-31',memo:'延長あり：4/1〜4/8 EC:3/16 9:00〜'},
+    {id:uid(),title:'母の日',                 team:'ec',    type:'campaign', start:'2026-04-24',end:'2026-05-10',memo:'仮名称。Store:4/24〜5/10 EC:4/24 9:00〜'},
+    {id:uid(),title:'GW2026',                team:'promo', type:'event',    start:'2026-04-29',end:'2026-05-05',memo:'日程未定のため仮入力'},
+    {id:uid(),title:'父の日2026',             team:'ec',    type:'campaign', start:'2026-06-05',end:'2026-06-21',memo:'Store:6/5〜6/21 EC:6/5 9:00〜'},
+    {id:uid(),title:'Zキャンペーン',           team:'ec',    type:'campaign', start:'2026-06-15',end:'2026-06-30',memo:'仮。創業祭次第で後ろ倒しあり EC:6/15 9:00〜'},
+    {id:uid(),title:'創業祭2026',             team:'ec',    type:'campaign', start:'2026-07-01',end:'2026-07-31',memo:'Store:7/1〜7/31 EC:7/1 9:00〜'},
+    {id:uid(),title:'お盆2026',              team:'ec',    type:'campaign', start:'2026-08-13',end:'2026-08-16',memo:'Store:8/13〜8/16 EC:8/13 9:00〜8/17 8:59'},
+  ]);
+}
+
+// ── View Switch ──
+function switchView(v){
+  currentView = v;
+  offset = 0;
+  document.getElementById('vtWeek').classList.toggle('active', v==='week');
+  document.getElementById('vtMonth').classList.toggle('active', v==='month');
+  document.getElementById('vtTimeline').classList.toggle('active', v==='timeline');
+  document.getElementById('vtDash').classList.toggle('active', v==='dashboard');
+  document.getElementById('weekView').style.display = v==='week' ? 'block' : 'none';
+  document.getElementById('monthView').style.display = v==='month' ? 'block' : 'none';
+  document.getElementById('dashboardView').style.display = v==='dashboard' ? 'block' : 'none';
+  document.getElementById('timelineView').style.display = v==='timeline' ? 'block' : 'none';
+  document.querySelector('.upcoming-section').style.display = (v==='dashboard'||v==='timeline') ? 'none' : '';
+  const nav = (v==='week'||v==='month');
+  document.getElementById('prevBtn').style.display = nav ? '' : 'none';
+  document.getElementById('nextBtn').style.display = nav ? '' : 'none';
+  document.getElementById('periodLabel').style.display = nav ? '' : 'none';
+  render();
+}
+function shiftPeriod(d){ offset+=d; render(); }
+function goToday(){ offset=0; render(); }
+
+// ── Filter ──
+function shouldShow(ev){
+  if(activeCat!=='all' && ev.type!==activeCat) return false;
+  // team='all' のイベントはどのチームフィルターでも表示
+  if(activeTeam!=='all' && ev.team!=='all' && ev.team!==activeTeam) return false;
+  if(searchQuery){
+    const q=searchQuery.toLowerCase();
+    if(!(ev.title||'').toLowerCase().includes(q) && !(ev.memo||'').toLowerCase().includes(q)) return false;
+  }
+  return true;
+}
+function onSearch(val){ searchQuery=val.trim(); render(); }
+function filterCat(cat,el){
+  activeCat=cat;
+  document.querySelectorAll('[data-cat]').forEach(li=>li.classList.toggle('dimmed', cat!=='all'&&li.dataset.cat!==cat&&li.dataset.cat!=='all'));
+  render();
+}
+function filterTeam(team,el){
+  activeTeam=team;
+  document.querySelectorAll('[data-team]').forEach(c=>c.classList.toggle('active', c.dataset.team===team));
+  render();
+}
+
+// ── Format helpers ──
+function fmt(s){ const[,m,d]=s.split('-'); return `${+m}/${+d}`; }
+function fmtFull(s){ const[y,m,d]=s.split('-'); return `${y}年${+m}月${+d}日`; }
+function pad(n){ return String(n).padStart(2,'0'); }
+function toDateStr(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+
+// ── RENDER ──
+function render(){
+  if(currentView==='week') renderWeek();
+  else if(currentView==='month') renderMonth();
+  else if(currentView==='timeline') renderStandaloneTimeline();
+  else renderDashboard();
+}
+
+// ── WEEK RENDER ──
+function getWeekStart(){
+  const t=new Date(); t.setHours(0,0,0,0);
+  const ws=new Date(t);
+  ws.setDate(ws.getDate()-ws.getDay()+offset*7);
+  return ws;
+}
+
+function renderWeek(){
+  const events=loadEvents();
+  const ws=getWeekStart();
+  const today=new Date(); today.setHours(0,0,0,0);
+  const we=new Date(ws); we.setDate(we.getDate()+6);
+
+  document.getElementById('periodLabel').textContent=
+    `${ws.getFullYear()}.${pad(ws.getMonth()+1)}.${pad(ws.getDate())} — ${pad(we.getMonth()+1)}.${pad(we.getDate())}`;
+  document.getElementById('weekRange').textContent=
+    `${today.getFullYear()}年${today.getMonth()+1}月${today.getDate()}日（${DAY_NAMES[today.getDay()]}）`;
+
+  const grid=document.getElementById('weekGrid');
+  grid.innerHTML='';
+
+  for(let i=0;i<7;i++){
+    const d=new Date(ws); d.setDate(d.getDate()+i);
+    const dStr=toDateStr(d);
+    const isToday=d.getTime()===today.getTime();
+    const isWe=d.getDay()===0||d.getDay()===6;
+
+    const dayEvs=events.filter(ev=>{
+      const e=ev.end||ev.start;
+      return dStr>=ev.start&&dStr<=e;
+    });
+
+    const col=document.createElement('div');
+    col.className=`day-col${isToday?' today':''}${isWe?' weekend':''}`;
+
+    col.innerHTML=`
+      <div class="day-header">
+        <div class="day-name">${DAY_NAMES[d.getDay()]}</div>
+        <div class="day-num">${d.getDate()}</div>
+        ${dayEvs.length?`<div class="day-count">${dayEvs.length}件</div>`:''}
+      </div>
+      <div class="day-events" id="de${i}"></div>`;
+    grid.appendChild(col);
+
+    const wrap=col.querySelector(`#de${i}`);
+    const addBtn=document.createElement('button');
+    addBtn.className='add-mini'; addBtn.textContent='+ 追加';
+    addBtn.onclick=()=>openAddModal(dStr);
+    wrap.appendChild(addBtn);
+
+    dayEvs.forEach(ev=>{
+      const card=makeEventCard(ev);
+      wrap.appendChild(card);
+    });
+  }
+  renderUpcoming(events, today);
+}
+
+function renderUpcoming(events, today){
+  const tStr=toDateStr(today);
+  const future=events.filter(ev=>ev.start>tStr&&shouldShow(ev)).sort((a,b)=>a.start.localeCompare(b.start)).slice(0,10);
+  const list=document.getElementById('upcomingList');
+  list.innerHTML='';
+  if(!future.length){ list.innerHTML='<span style="color:var(--text-muted);font-size:.75rem">近日スタートの予定はありません</span>'; return; }
+  future.forEach(ev=>{
+    const chip=document.createElement('div');
+    chip.className='up-chip';
+    const tentative=ev.tentative===true||ev.tentative==='TRUE'||ev.tentative==='true';
+    const tentBadge=tentative?`<span style="font-size:.6rem;color:var(--cat-deadline);background:var(--cat-deadline-soft);padding:1px 6px;border-radius:8px;border:1px solid var(--cat-deadline);">仮</span>`:'';
+    chip.innerHTML=`<span class="up-dot" style="background:${evColor(ev)}"></span><span>${tentBadge}${tentative?`〔仮〕${ev.title}`:ev.title}</span><span style="font-size:.6rem;color:var(--text-muted)">${TEAMS[ev.team]||TEAMS.all}</span><span class="up-date">${fmt(ev.start)}〜</span>`;
+    chip.onclick=()=>openDetail(ev.id);
+    list.appendChild(chip);
+  });
+}
+
+// ── MONTH RENDER ──
+function getMonthStart(){
+  const t=new Date();
+  return new Date(t.getFullYear(), t.getMonth()+offset, 1);
+}
+
+function renderMonth(){
+  const events=loadEvents();
+  const today=new Date(); today.setHours(0,0,0,0);
+  const ms=getMonthStart();
+  const me=new Date(ms.getFullYear(), ms.getMonth()+1, 0);
+
+  document.getElementById('periodLabel').textContent=
+    `${ms.getFullYear()}年 ${MONTH_NAMES[ms.getMonth()]}`;
+  document.getElementById('weekRange').textContent=
+    `${today.getFullYear()}年${today.getMonth()+1}月${today.getDate()}日（${DAY_NAMES[today.getDay()]}）`;
+
+  const grid=document.getElementById('monthGrid');
+  grid.innerHTML='';
+
+  // Day headers
+  DAY_NAMES.forEach(n=>{
+    const el=document.createElement('div');
+    el.className='month-dayname'; el.textContent=n;
+    grid.appendChild(el);
+  });
+
+  // Cells
+  const startDay=ms.getDay(); // 0=Sun
+  const totalCells=Math.ceil((startDay+me.getDate())/7)*7;
+
+  for(let i=0;i<totalCells;i++){
+    const d=new Date(ms); d.setDate(1-startDay+i);
+    const dStr=toDateStr(d);
+    const isThisMonth=d.getMonth()===ms.getMonth();
+    const isToday=d.getTime()===today.getTime();
+
+    const cell=document.createElement('div');
+    cell.className=`month-cell${!isThisMonth?' other-month':''}${isToday?' today':''}`;
+
+    const numEl=document.createElement('div');
+    numEl.className='month-cell-num'; numEl.textContent=d.getDate();
+    cell.appendChild(numEl);
+
+    const dayEvs=events.filter(ev=>{
+      const e=ev.end||ev.start;
+      return dStr>=ev.start&&dStr<=e&&shouldShow(ev);
+    });
+
+    const maxShow=3;
+    dayEvs.slice(0,maxShow).forEach(ev=>{
+      const tentative=ev.tentative===true||ev.tentative==='TRUE'||ev.tentative==='true';
+      const pill=document.createElement('div');
+      pill.className='month-event'+(tentative?' tentative':'');
+      pill.style.background=evColor(ev)+'22';
+      pill.style.color=evColor(ev);
+      pill.style.borderLeft=`3px solid ${evColor(ev)}`;
+      pill.textContent=tentative?`〔仮〕${ev.title}`:ev.title;
+      pill.onclick=()=>openDetail(ev.id);
+      cell.appendChild(pill);
+    });
+    if(dayEvs.length>maxShow){
+      const more=document.createElement('div');
+      more.className='month-more';
+      more.textContent=`+${dayEvs.length-maxShow}件`;
+      more.onclick=()=>openAddModal(dStr);
+      cell.appendChild(more);
+    }
+
+    const addEl=document.createElement('div');
+    addEl.className='month-add-btn'; addEl.textContent='+ 追加';
+    addEl.onclick=()=>openAddModal(dStr);
+    cell.appendChild(addEl);
+
+    grid.appendChild(cell);
+  }
+  renderUpcoming(events, today);
+}
+
+function makeEventCard(ev){
+  const card=document.createElement('div');
+  const hidden=!shouldShow(ev);
+  const tentative=ev.tentative===true||ev.tentative==='TRUE'||ev.tentative==='true';
+  card.className=`event-card c-${ev.type}${hidden?' hidden':''}${(ev.end&&ev.end!==ev.start)?' is-span':''}${tentative?' tentative':''}`;
+  if(ev.type==='campaign'){
+    const c=campaignColor(ev.title);
+    card.style.borderLeftColor=c;
+    card.style.background=c+'18';
+  }
+  card.innerHTML=`
+    <div class="ev-cat">${CATS[ev.type].icon} ${CATS[ev.type].label}</div>
+    <div class="ev-title">${ev.title}</div>
+    <div class="ev-team">${TEAMS[ev.team]||TEAMS.all}</div>`;
+  card.onclick=()=>openDetail(ev.id);
+  return card;
+}
+
+// ── Add / Detail Modals ──
+function openAddModal(dateStr){
+  const today=new Date().toISOString().slice(0,10);
+  document.getElementById('ev-start').value=dateStr||today;
+  document.getElementById('ev-end').value=dateStr||today;
+  document.getElementById('ev-title').value='';
+  document.getElementById('ev-memo').value='';
+  document.getElementById('ev-tentative').checked=false;
+  document.getElementById('addModal').classList.add('open');
+}
+function saveEvent(){
+  const title=document.getElementById('ev-title').value.trim();
+  if(!title){ alert('タイトルを入力してください'); return; }
+  const tentative=document.getElementById('ev-tentative').checked;
+  const newEv={
+    id:uid(), title,
+    team:document.getElementById('ev-team').value,
+    type:document.getElementById('ev-type').value,
+    start:document.getElementById('ev-start').value,
+    end:document.getElementById('ev-end').value||document.getElementById('ev-start').value,
+    memo:document.getElementById('ev-memo').value.trim(),
+    tentative,
+  };
+  // スプレッドシートに書き込む
+  const sheetUrl=window._sheetURL||localStorage.getItem('bs3_sheet_url')||SHEET_CSV_URL;
+  if(sheetUrl){
+    fetch(sheetUrl,{
+      method:'POST',
+      mode:'no-cors',
+      headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify({...newEv, tentative:tentative?'TRUE':'FALSE'}),
+    }).then(()=>{ setTimeout(()=>loadFromSheetDynamic(), 1500); }).catch(()=>{
+      // 書き込み失敗時はローカルに保存
+      const evs=loadEvents(); evs.push(newEv); saveEvents(evs); render();
+    });
+  } else {
+    const evs=loadEvents(); evs.push(newEv); saveEvents(evs); render();
+  }
+  closeModals();
+}
+
+function openDetail(id){
+  const ev=loadEvents().find(e=>e.id===id);
+  if(!ev) return;
+  selectedId=id;
+  const cat=CATS[ev.type];
+  document.getElementById('d-bar').style.background=cat.color;
+  document.getElementById('d-cat').style.color=cat.color;
+  document.getElementById('d-cat').textContent=`${cat.icon} ${cat.label}`;
+  document.getElementById('d-title').textContent=ev.title;
+  document.getElementById('d-dates').textContent=
+    (ev.end&&ev.end!==ev.start)?`${fmtFull(ev.start)} 〜 ${fmtFull(ev.end)}`:fmtFull(ev.start);
+  document.getElementById('d-team').textContent=`担当チーム：${TEAMS[ev.team]||TEAMS.all}`;
+  const tentBadge=document.getElementById('d-tentative-badge');
+  const isTentative=ev.tentative===true||ev.tentative==='TRUE'||ev.tentative==='true';
+  tentBadge.style.display=isTentative?'inline-block':'none';
+  const badge=document.getElementById('d-sheet-badge');
+  badge.style.display='none';
+  // 削除ボタンは常に表示（シートデータも削除可能に）
+  document.querySelector('#detailModal .btn-delete').style.display='inline-block';
+  const memo=document.getElementById('d-memo');
+  if(ev.memo){ memo.style.display='block'; memo.textContent=ev.memo; } else { memo.style.display='none'; }
+  document.getElementById('detailModal').classList.add('open');
+}
+
+function openEditModal(){
+  const ev=loadEvents().find(e=>e.id===selectedId);
+  if(!ev) return;
+  document.getElementById('edit-title').value=ev.title||'';
+  document.getElementById('edit-start').value=ev.start||'';
+  document.getElementById('edit-end').value=ev.end||ev.start||'';
+  document.getElementById('edit-type').value=ev.type||'campaign';
+  document.getElementById('edit-team').value=ev.team||'all';
+  document.getElementById('edit-memo').value=ev.memo||'';
+  const isTentative=ev.tentative===true||ev.tentative==='TRUE'||ev.tentative==='true';
+  document.getElementById('edit-tentative').checked=isTentative;
+  document.getElementById('detailModal').classList.remove('open');
+  document.getElementById('editModal').classList.add('open');
+}
+
+function updateEvent(){
+  const ev=loadEvents().find(e=>e.id===selectedId);
+  if(!ev) return;
+  const tentative=document.getElementById('edit-tentative').checked;
+  const updated={
+    ...ev,
+    title:document.getElementById('edit-title').value.trim(),
+    start:document.getElementById('edit-start').value,
+    end:document.getElementById('edit-end').value,
+    type:document.getElementById('edit-type').value,
+    team:document.getElementById('edit-team').value,
+    memo:document.getElementById('edit-memo').value.trim(),
+    tentative,
+  };
+  const sheetUrl=window._sheetURL||localStorage.getItem('bs3_sheet_url')||SHEET_CSV_URL;
+  if(sheetUrl && ev._fromSheet && ev._row){
+    fetch(sheetUrl,{
+      method:'POST',
+      mode:'no-cors',
+      headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify({...updated, action:'update', _row:ev._row, tentative:tentative?'TRUE':'FALSE'}),
+    }).then(()=>{ setTimeout(()=>loadFromSheetDynamic(), 1500); }).catch(()=>{ render(); });
+  } else {
+    const evs=loadEvents().map(e=>e.id===selectedId?updated:e);
+    saveEvents(evs); render();
+  }
+  closeModals();
+}
+
+function deleteEvent(){
+  if(!confirm('このイベントを削除しますか？')) return;
+  const ev=loadEvents().find(e=>e.id===selectedId);
+  const sheetUrl=window._sheetURL||localStorage.getItem('bs3_sheet_url')||SHEET_CSV_URL;
+  // 即座にUIから削除（楽観的更新）
+  window._sheetsEvents=(window._sheetsEvents||[]).filter(e=>e.id!==selectedId);
+  saveEvents(loadEvents().filter(e=>e.id!==selectedId));
+  render();
+  if(sheetUrl && ev && ev._fromSheet && ev._row){
+    fetch(sheetUrl,{
+      method:'POST',
+      mode:'no-cors',
+      headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify({action:'delete', _row:ev._row}),
+    }).then(()=>{ setTimeout(()=>loadFromSheetDynamic(), 2000); }).catch(()=>{});
+  }
+  closeModals();
+}
+function closeModals(){
+  document.querySelectorAll('.modal-overlay').forEach(m=>m.classList.remove('open'));
+  selectedId=null; pendingImport=[];
+  document.getElementById('importResult').style.display='none';
+  document.getElementById('importError').style.display='none';
+  document.getElementById('csvPreview').innerHTML='';
+  document.getElementById('importConfirmBtn').style.display='none';
+  document.getElementById('gcalBulkResult').style.display='none';
+  document.getElementById('csvFileInput').value='';
+}
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeModals();}));
+
+// ── CSV ──
+function openCSVModal(){
+  // update export summary
+  const evs=loadEvents();
+  const summary=`全 ${evs.length} 件のイベント`;
+  document.getElementById('exportSummary').textContent=summary;
+  switchCSVTab('import', document.querySelector('.csv-tab'));
+  document.getElementById('csvModal').classList.add('open');
+}
+function switchCSVTab(tab, el){
+  document.querySelectorAll('.csv-tab').forEach((t,i)=>t.classList.toggle('active', ['import','export'][i]===tab));
+  document.getElementById('csv-import-pane').classList.toggle('active', tab==='import');
+  document.getElementById('csv-export-pane').classList.toggle('active', tab==='export');
+}
+
+// Drag & drop
+const dz=document.getElementById('csvDropzone');
+dz.addEventListener('dragover',e=>{ e.preventDefault(); dz.classList.add('dragover'); });
+dz.addEventListener('dragleave',()=>dz.classList.remove('dragover'));
+dz.addEventListener('drop',e=>{ e.preventDefault(); dz.classList.remove('dragover'); if(e.dataTransfer.files[0]) handleCSVFile(e.dataTransfer.files[0]); });
+
+function handleCSVFile(file){
+  if(!file||!file.name.endsWith('.csv')){ showImportError('CSVファイル（.csv）を選択してください'); return; }
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const text=e.target.result;
+    parseCSV(text);
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function parseCSV(text){
+  const lines=text.trim().split(/\r?\n/);
+  if(lines.length<2){ showImportError('データが見つかりません（ヘッダー行＋データ行が必要です）'); return; }
+
+  const header=lines[0].split(',').map(h=>h.trim().toLowerCase().replace(/^"|"$/g,''));
+  const titleIdx=header.indexOf('title');
+  const startIdx=header.indexOf('start');
+  const endIdx=header.indexOf('end');
+  const typeIdx=header.indexOf('type');
+  const teamIdx=header.indexOf('team');
+  const memoIdx=header.indexOf('memo');
+
+  if(titleIdx<0||startIdx<0){ showImportError('CSVに "title" と "start" 列が必要です'); return; }
+
+  const parsed=[]; const errors=[];
+  for(let i=1;i<lines.length;i++){
+    if(!lines[i].trim()) continue;
+    const cols=splitCSVLine(lines[i]);
+    const title=(cols[titleIdx]||'').trim();
+    const start=(cols[startIdx]||'').trim();
+    const end=(endIdx>=0?(cols[endIdx]||'').trim():'')||start;
+    const type=typeIdx>=0?(cols[typeIdx]||'').trim():'other';
+    const team=teamIdx>=0?(cols[teamIdx]||'').trim():'all';
+    const memo=memoIdx>=0?(cols[memoIdx]||'').trim():'';
+
+    if(!title||!start){ errors.push(`行${i+1}: titleまたはstartが空`); continue; }
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(start)){ errors.push(`行${i+1}: start日付の形式が不正（YYYY-MM-DD）`); continue; }
+    if(!VALID_TYPES.includes(type)){ errors.push(`行${i+1}: type "${type}" は無効（campaign/launch/deadline/event/other）`); continue; }
+    if(!VALID_TEAMS.includes(team)){ errors.push(`行${i+1}: team "${team}" は無効（all/promo/sponsor/ad/ec/design/vmd）`); continue; }
+    parsed.push({id:uid(), title, start, end:end||start, type, team, memo});
+  }
+
+  const preview=document.getElementById('csvPreview');
+  preview.innerHTML='';
+  if(errors.length){
+    showImportError('⚠ エラーがある行はスキップされます：\n'+errors.join('\n'));
+  } else {
+    document.getElementById('importError').style.display='none';
+  }
+
+  if(!parsed.length){ showImportError('有効なデータが見つかりませんでした'); return; }
+
+  parsed.slice(0,8).forEach(ev=>{
+    const row=document.createElement('div');
+    row.className='csv-preview-row';
+    row.innerHTML=`<span style="color:${evColor(ev)}">●</span><strong>${ev.title}</strong><span style="color:var(--text-muted)">${ev.start}</span><span style="color:var(--text-muted);font-size:.6rem">${TEAMS[ev.team]}</span>`;
+    preview.appendChild(row);
+  });
+  if(parsed.length>8){
+    const more=document.createElement('div');
+    more.style.cssText='font-size:.68rem;color:var(--text-muted);padding:4px 8px;font-family:DM Mono,monospace';
+    more.textContent=`... 他 ${parsed.length-8} 件`;
+    preview.appendChild(more);
+  }
+
+  pendingImport=parsed;
+  const resultEl=document.getElementById('importResult');
+  resultEl.style.display='block';
+  resultEl.textContent=`✓ ${parsed.length} 件のイベントが読み込まれました。「インポート実行」で追加します。`;
+  document.getElementById('importConfirmBtn').style.display='block';
+}
+
+function splitCSVLine(line){
+  const result=[]; let cur=''; let inQuote=false;
+  for(let i=0;i<line.length;i++){
+    const c=line[i];
+    if(c==='"'){ inQuote=!inQuote; }
+    else if(c===','&&!inQuote){ result.push(cur.trim()); cur=''; }
+    else { cur+=c; }
+  }
+  result.push(cur.trim());
+  return result.map(v=>v.replace(/^"|"$/g,''));
+}
+
+function confirmImport(){
+  if(!pendingImport.length) return;
+  const evs=loadEvents();
+  pendingImport.forEach(ev=>evs.push(ev));
+  saveEvents(evs);
+  const n=pendingImport.length;
+  pendingImport=[];
+  document.getElementById('importResult').textContent=`✅ ${n} 件のイベントをインポートしました！`;
+  document.getElementById('importConfirmBtn').style.display='none';
+  render();
+}
+
+function showImportError(msg){
+  const el=document.getElementById('importError');
+  el.style.display='block'; el.textContent=msg;
+}
+
+function exportCSV(){
+  const evs=loadEvents();
+  if(!evs.length){ alert('エクスポートするイベントがありません'); return; }
+  const rows=[['title','start','end','type','team','memo']];
+  evs.forEach(ev=>{
+    rows.push([
+      `"${(ev.title||'').replace(/"/g,'""')}"`,
+      ev.start, ev.end||ev.start, ev.type, ev.team,
+      `"${(ev.memo||'').replace(/"/g,'""')}"`
+    ]);
+  });
+  const csv='\uFEFF'+rows.map(r=>r.join(',')).join('\n'); // BOM for Excel
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url;
+  a.download=`brand_calendar_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+// ── Google Calendar ──
+function gcalDateStr(dateStr, isEnd=false){
+  // Google Calendar URL format: YYYYMMDD
+  const d=dateStr.replace(/-/g,'');
+  if(isEnd){
+    // gcal end date is exclusive, add 1 day
+    const dt=new Date(dateStr);
+    dt.setDate(dt.getDate()+1);
+    return `${dt.getFullYear()}${pad(dt.getMonth()+1)}${pad(dt.getDate())}`;
+  }
+  return d;
+}
+
+function buildGCalURL(ev){
+  const start=gcalDateStr(ev.start);
+  const end=gcalDateStr(ev.end||ev.start, true);
+  const details=encodeURIComponent([
+    `カテゴリ：${CATS[ev.type].label}`,
+    `チーム：${TEAMS[ev.team]}`,
+    ev.memo||''
+  ].filter(Boolean).join('\n'));
+  const title=encodeURIComponent(`[${CATS[ev.type].icon}${TEAMS[ev.team]}] ${ev.title}`);
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${details}`;
+}
+
+function addToGCalSingle(){
+  const ev=loadEvents().find(e=>e.id===selectedId);
+  if(!ev) return;
+  window.open(buildGCalURL(ev), '_blank');
+}
+
+function openGCalModal(){
+  document.getElementById('gcalModal').classList.add('open');
+}
+
+function bulkAddToGCal(){
+  const evs=loadEvents();
+  if(!evs.length){ alert('イベントがありません'); return; }
+  const resultEl=document.getElementById('gcalBulkResult');
+  resultEl.style.display='block';
+  resultEl.innerHTML=`<div style="font-size:.74rem;color:var(--text-muted);margin-bottom:8px;">以下のリンクを順番に開いてください（ポップアップブロックが出た場合は許可してください）</div>`;
+  evs.forEach(ev=>{
+    const a=document.createElement('a');
+    a.href=buildGCalURL(ev);
+    a.target='_blank';
+    a.style.cssText='display:block;padding:5px 8px;border-radius:3px;font-size:.72rem;color:#1a73e8;background:rgba(26,115,232,.06);margin-bottom:4px;text-decoration:none;';
+    a.innerHTML=`📅 ${ev.title} <span style="color:var(--text-muted);font-size:.63rem">${fmt(ev.start)}${ev.end&&ev.end!==ev.start?'〜'+fmt(ev.end):''}</span>`;
+    resultEl.appendChild(a);
+  });
+}
+
+// ── ICS Export ──
+function downloadICS(){
+  const evs=loadEvents();
+  if(!evs.length){ alert('イベントがありません'); return; }
+  const now=new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z';
+  let ics=`BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//BrandStrategy//CalendarExport//JA\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\n`;
+  evs.forEach(ev=>{
+    const dtStart=ev.start.replace(/-/g,'');
+    const dtEndRaw=ev.end||ev.start;
+    const dtEndDate=new Date(dtEndRaw); dtEndDate.setDate(dtEndDate.getDate()+1);
+    const dtEnd=`${dtEndDate.getFullYear()}${pad(dtEndDate.getMonth()+1)}${pad(dtEndDate.getDate())}`;
+    const summary=`[${CATS[ev.type].label}・${TEAMS[ev.team]}] ${ev.title}`;
+    const desc=(ev.memo||'').replace(/\n/g,'\\n');
+    ics+=`BEGIN:VEVENT\r\nUID:${ev.id}@brandstrategy\r\nDTSTAMP:${now}\r\nDTSTART;VALUE=DATE:${dtStart}\r\nDTEND;VALUE=DATE:${dtEnd}\r\nSUMMARY:${summary}\r\nDESCRIPTION:${desc}\r\nEND:VEVENT\r\n`;
+  });
+  ics+='END:VCALENDAR';
+  const blob=new Blob([ics],{type:'text/calendar;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url;
+  a.download=`brand_calendar_${new Date().toISOString().slice(0,10)}.ics`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+// ── KPI Sheet ──
+let kpiData = [];   // [{channel,label,target,actual,yoy}]
+let kpiLoadStatus = 'idle'; // idle|loading|ok|error|unconfigured
+let kpiChVisible = localStorage.getItem('bs3_kpi_visible') !== 'false';
+
+async function loadKPIData(){
+  // 旧方式（直接CSV URL）が残っていればクリア
+  localStorage.removeItem('bs3_kpi_url');
+  // イベントと同じ GAS エンドポイントに ?type=kpi で問い合わせ
+  const base=window._sheetURL||localStorage.getItem('bs3_sheet_url')||SHEET_CSV_URL;
+  if(!base){ kpiData=[]; kpiLoadStatus='unconfigured'; if(currentView==='dashboard') renderDashboard(); return; }
+  kpiLoadStatus='loading';
+  try{
+    const sep=base.includes('?')?'&':'?';
+    const res=await fetch(base+sep+'type=kpi');
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const json=await res.json();
+    kpiData=Array.isArray(json)?json.filter(r=>r.channel&&r.label):[];
+    kpiLoadStatus='ok';
+  } catch(e){
+    console.warn('KPI load failed:',e);
+    kpiData=[]; kpiLoadStatus='error';
+  }
+  if(currentView==='dashboard') renderDashboard();
+}
+
+function clearKPIUrl(){
+  localStorage.removeItem('bs3_kpi_url');
+  kpiData=[]; kpiLoadStatus='unconfigured';
+  if(currentView==='dashboard') renderDashboard();
+}
+
+function parseKPICSV(text){
+  const lines=text.trim().split(/\r?\n/);
+  if(lines.length<2) return [];
+  const h=lines[0].split(',').map(v=>v.trim().replace(/^"|"$/g,'').toLowerCase());
+  const ci=h.indexOf('channel'),li=h.indexOf('label'),ti=h.indexOf('target'),ai=h.indexOf('actual'),yi=h.indexOf('yoy');
+  if(ci<0||li<0||ti<0||ai<0) return [];
+  const out=[];
+  for(let i=1;i<lines.length;i++){
+    if(!lines[i].trim()) continue;
+    const c=splitCSVLine(lines[i]);
+    const ch=(c[ci]||'').trim(), lb=(c[li]||'').trim();
+    if(!ch||!lb) continue;
+    const tgt=parseFloat((c[ti]||'').replace(/,/g,''))||0;
+    const act=parseFloat((c[ai]||'').replace(/,/g,''))||0;
+    const yoy=yi>=0?parseFloat((c[yi]||'').replace(/,/g,''))||null:null;
+    out.push({channel:ch,label:lb,target:tgt,actual:act,yoy});
+  }
+  return out;
+}
+
+const KPI_CH_COLOR={
+  'ALL':         {bg:'#FDF0E6',fg:'#8B3A00'},
+  '全体':        {bg:'#FDF0E6',fg:'#8B3A00'},
+};
+function kpiChColor(ch){ return KPI_CH_COLOR[ch]||{bg:'#F2F2F2',fg:'#555555'}; }
+
+function kpiRateStyle(rate){
+  if(rate>=1.10) return {bg:'#C8EDD4',fg:'#145A2A',label:'◎'};
+  if(rate>=1.00) return {bg:'#E6F4EA',fg:'#2E7D32',label:'○'};
+  if(rate>=0.90) return {bg:'#FFF8DC',fg:'#7A4F00',label:'△'};
+  return {bg:'#FDECEA',fg:'#B71C1C',label:'×'};
+}
+
+function fmtKPIVal(val,label){
+  if(!val&&val!==0) return '－';
+  const s=String(label||'');
+  if(s.includes('売上')||s.includes('金額')){
+    if(val>=100000000) return `¥${(val/100000000).toFixed(1)}億`;
+    if(val>=10000) return `¥${Math.round(val/10000).toLocaleString()}万`;
+    return `¥${Math.round(val).toLocaleString()}`;
+  }
+  if(s.includes('率')) return val%1===0?val.toFixed(2):val.toFixed(2);
+  return Math.round(val).toLocaleString();
+}
+
+function toggleKpiCh(){
+  kpiChVisible=!kpiChVisible;
+  localStorage.setItem('bs3_kpi_visible', kpiChVisible);
+  renderDashboard();
+}
+
+function renderKPIChannelSection(container){
+  const sec=document.createElement('div');
+  sec.className='dash-section';
+  const toggleLabel=kpiChVisible?'▲ 非表示':'▼ 表示';
+  sec.innerHTML=`<div class="dash-section-title">📊 チャネル別 KPI<button onclick="toggleKpiCh()" style="margin-left:auto;background:transparent;border:1.5px solid var(--border);border-radius:20px;padding:2px 12px;font-size:.65rem;color:var(--text-muted);cursor:pointer;font-family:'Noto Sans JP',sans-serif;">${toggleLabel}</button></div>`;
+
+  if(kpiLoadStatus==='unconfigured'){
+    const hint=document.createElement('div');
+    hint.className='kpi-setup-hint';
+    hint.innerHTML='KPIシートが未設定です。<br><span style="font-size:.72rem">⚙ シート設定 からKPIシートのURLを登録すると、売上・客数などの達成率がここに表示されます。</span>';
+    hint.onclick=openSheetSetupModal;
+    sec.appendChild(hint); container.appendChild(sec); return;
+  }
+  if(kpiLoadStatus==='idle'||kpiLoadStatus==='loading'){
+    sec.innerHTML+='<div class="kpi-status-bar">🔄 KPIデータ読み込み中…</div>';
+    container.appendChild(sec); return;
+  }
+  if(kpiLoadStatus==='error'){
+    const savedUrl=localStorage.getItem('bs3_kpi_url')||'';
+    const errBox=document.createElement('div');
+    errBox.style.cssText='background:var(--cat-campaign-soft);border:1.5px solid rgba(192,90,42,.25);border-radius:6px;padding:14px 16px;';
+    errBox.innerHTML=`
+      <div style="font-size:.78rem;color:var(--cat-campaign);font-weight:600;margin-bottom:8px;">⚠️ KPIデータの読み込みに失敗しました</div>
+      <div style="font-size:.69rem;color:var(--text-muted);margin-bottom:4px;">設定中のURL：</div>
+      <div style="font-family:'Noto Sans JP',sans-serif;font-size:.62rem;color:var(--text-muted);background:var(--surface);border-radius:3px;padding:5px 8px;margin-bottom:12px;word-break:break-all;">${savedUrl||'（未設定）'}</div>
+      <div style="font-size:.69rem;color:var(--text-muted);margin-bottom:12px;">
+        よくある原因：① GASのdoGet関数にKPI対応コードが追記・再デプロイされていない　② GASエンドポイントURLが未設定　③ GASのアクセス権限が「全員」になっていない
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="nav-btn primary" style="font-size:.7rem;padding:5px 14px;" onclick="openSheetSetupModal()">⚙ URL を修正する</button>
+        <button class="nav-btn" style="font-size:.7rem;padding:5px 14px;color:var(--cat-campaign);border-color:rgba(192,90,42,.3);" onclick="clearKPIUrl()">KPI設定をクリア</button>
+        <button class="nav-btn" style="font-size:.7rem;padding:5px 14px;" onclick="loadKPIData()">🔄 再試行</button>
+      </div>`;
+    sec.appendChild(errBox);
+    container.appendChild(sec); return;
+  }
+  if(!kpiData.length){
+    const emptyBox=document.createElement('div');
+    emptyBox.className='kpi-setup-hint';
+    emptyBox.innerHTML='KPIデータが見つかりません。<br><span style="font-size:.7rem">スプレッドシートの列名が <code>channel, label, target, actual, yoy</code> になっているか確認してください。</span>';
+    emptyBox.onclick=openSheetSetupModal;
+    sec.appendChild(emptyBox);
+    container.appendChild(sec); return;
+  }
+
+  // チャネル一覧（'全体' を先頭に）
+  const channels=[...new Set(kpiData.map(r=>r.channel))];
+  const sorted=['全体',...channels.filter(c=>c!=='全体')];
+
+  if(!kpiChVisible){ container.appendChild(sec); return; }
+
+  const grid=document.createElement('div');
+  grid.className='kpi-ch-grid';
+
+  sorted.forEach(ch=>{
+    const metrics=kpiData.filter(r=>r.channel===ch);
+    if(!metrics.length) return;
+    const chCol=kpiChColor(ch);
+
+    // 総合判定：全指標の達成率の最低値で判断
+    const rates=metrics.filter(m=>m.target>0).map(m=>m.actual/m.target);
+    const worstRate=rates.length?Math.min(...rates):1;
+    const ovStyle=kpiRateStyle(worstRate);
+
+    const card=document.createElement('div');
+    card.className='kpi-ch-card';
+
+    // ヘッダー
+    const head=document.createElement('div');
+    head.className='kpi-ch-head';
+    head.style.cssText=`background:${chCol.bg};`;
+    head.innerHTML=`<span class="kpi-ch-name" style="color:${chCol.fg}">${ch}</span>`+
+      `<span class="kpi-ch-badge" style="background:${ovStyle.bg};color:${ovStyle.fg}">${ovStyle.label} ${Math.round(worstRate*100)}%</span>`;
+    card.appendChild(head);
+
+    // 指標行
+    metrics.forEach(m=>{
+      const rate=m.target>0?(m.actual/m.target):null;
+      const rs=rate!==null?kpiRateStyle(rate):null;
+      const row=document.createElement('div');
+      row.className='kpi-metric';
+      const rateStr=rs?`<span class="kpi-metric-rate" style="background:${rs.bg};color:${rs.fg}">${rs.label} ${Math.round(rate*100)}%</span>`:'<span class="kpi-metric-rate" style="background:#f5f5f5;color:#999">－</span>';
+      const yoyStr=m.yoy?`<span style="font-size:.62rem;color:var(--text-muted);margin-left:4px">前年${m.yoy}%</span>`:'';
+      row.innerHTML=`<span class="kpi-metric-lbl">${m.label}</span>`+
+        `<span class="kpi-metric-val">${fmtKPIVal(m.actual,m.label)}</span>`+
+        rateStr+yoyStr;
+      card.appendChild(row);
+    });
+
+    grid.appendChild(card);
+  });
+  sec.appendChild(grid);
+  container.appendChild(sec);
+}
+
+// ── Dashboard ──
+function renderDashboard(){
+  const events=loadEvents();
+  const today=new Date(); today.setHours(0,0,0,0);
+  const tStr=toDateStr(today);
+  const mStart=new Date(today.getFullYear(),today.getMonth(),1);
+  const mEnd=new Date(today.getFullYear(),today.getMonth()+1,0);
+  const mStartStr=toDateStr(mStart);
+  const mEndStr=toDateStr(mEnd);
+  const wStart=new Date(today); wStart.setDate(wStart.getDate()-wStart.getDay());
+  const wEnd=new Date(wStart); wEnd.setDate(wEnd.getDate()+6);
+  const wStartStr=toDateStr(wStart);
+  const wEndStr=toDateStr(wEnd);
+
+  const filtered=events.filter(shouldShow);
+
+  const monthEvs=filtered.filter(ev=>{ const e=ev.end||ev.start; return ev.start<=mEndStr&&e>=mStartStr; });
+  const campaignCnt=monthEvs.filter(ev=>ev.type==='campaign').length;
+  const activeEvs=filtered.filter(ev=>{ const e=ev.end||ev.start; return ev.start<=tStr&&e>=tStr; }).sort((a,b)=>a.start.localeCompare(b.start));
+  const tentEvs=filtered.filter(ev=>ev.tentative===true||ev.tentative==='TRUE'||ev.tentative==='true').sort((a,b)=>a.start.localeCompare(b.start));
+  const upcomingEvs=filtered.filter(ev=>{ const tent=ev.tentative===true||ev.tentative==='TRUE'||ev.tentative==='true'; return !tent&&ev.start>tStr; }).sort((a,b)=>a.start.localeCompare(b.start));
+  const weekEvs=filtered.filter(ev=>{ const e=ev.end||ev.start; return ev.start<=wEndStr&&e>=wStartStr; }).sort((a,b)=>a.start.localeCompare(b.start));
+  const allTentCnt=events.filter(ev=>ev.tentative===true||ev.tentative==='TRUE'||ev.tentative==='true').length;
+
+  const con=document.getElementById('dashboardView');
+  con.innerHTML='';
+
+  // KPI Cards
+  const kpiGrid=document.createElement('div');
+  kpiGrid.className='kpi-grid';
+  [
+    {label:'今月のイベント', value:monthEvs.length, sub:`${today.getMonth()+1}月の総件数`, color:''},
+    {label:'Campaign',      value:campaignCnt,      sub:'今月のキャンペーン',  color:'var(--cat-campaign)'},
+    {label:'進行中',         value:activeEvs.length, sub:'本日を含む期間',     color:'var(--cat-event)'},
+    {label:'仮イベント',     value:allTentCnt,        sub:'未確定の件数',       color:'var(--cat-deadline)'},
+  ].forEach(k=>{
+    const card=document.createElement('div');
+    card.className='kpi-card';
+    card.innerHTML=`<div class="kpi-label">${k.label}</div><div class="kpi-value"${k.color?` style="color:${k.color}"`:''}>${k.value}</div><div class="kpi-sub">${k.sub}</div>`;
+    kpiGrid.appendChild(card);
+  });
+  con.appendChild(kpiGrid);
+
+  // KPI Channel Cards (from spreadsheet)
+  renderKPIChannelSection(con);
+
+  // Active + Upcoming + Tentative (3 columns)
+  const two=document.createElement('div');
+  two.className='dash-three-col';
+
+  const mkSection=(title,evList,emptyMsg)=>{
+    const sec=document.createElement('div');
+    sec.className='dash-section';
+    sec.innerHTML=`<div class="dash-section-title">${title}</div>`;
+    const list=document.createElement('div');
+    list.className='dash-event-list';
+    if(!evList.length){ list.innerHTML=`<p style="color:var(--text-muted);font-size:.75rem">${emptyMsg}</p>`; }
+    else evList.forEach(ev=>list.appendChild(makeDashRow(ev)));
+    sec.appendChild(list);
+    return sec;
+  };
+  two.appendChild(mkSection('進行中のイベント', activeEvs, '現在進行中のイベントはありません'));
+  two.appendChild(mkSection('今後のイベント', upcomingEvs, '今後のイベントはありません'));
+  two.appendChild(mkSection('仮イベント一覧', tentEvs, '未確定のイベントはありません'));
+  con.appendChild(two);
+
+  // This week
+  con.appendChild(mkSection(`今週の予定（${fmt(wStartStr)}〜${fmt(wEndStr)}）`, weekEvs, '今週の予定はありません'));
+
+  // Timeline
+  const tlSec=document.createElement('div');
+  tlSec.className='dash-section';
+  tlSec.innerHTML='<div class="dash-section-title">タイムライン（直近90日）</div>';
+  renderTimeline(events, tlSec);
+  con.appendChild(tlSec);
+}
+
+function makeDashRow(ev){
+  const row=document.createElement('div');
+  row.className='dash-event-row';
+  const tent=ev.tentative===true||ev.tentative==='TRUE'||ev.tentative==='true';
+  const evEnd=ev.end||ev.start;
+  const dateStr=evEnd!==ev.start?`${fmt(ev.start)}〜${fmt(evEnd)}`:fmt(ev.start);
+  const tentBadge=tent?`<span class="dash-tent-badge">仮</span>`:'';
+  row.innerHTML=`
+    <span class="dash-ev-dot" style="background:${evColor(ev)}"></span>
+<span class="dash-ev-title">${tentBadge}${ev.title}</span>
+    <span class="dash-ev-cat" style="color:${evColor(ev)};background:${evColor(ev)}18">${CATS[ev.type].label}</span>
+    <span class="dash-ev-team">${TEAMS[ev.team]||TEAMS.all}</span>
+    <span class="dash-ev-dates">${dateStr}</span>`;
+  row.onclick=()=>openDetail(ev.id);
+  return row;
+}
+
+function renderStandaloneTimeline(){
+  const container = document.getElementById('timelineView');
+  container.innerHTML = '';
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'padding:20px 0;';
+  const title = document.createElement('div');
+  title.style.cssText = 'font-size:.75rem;font-weight:700;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px;padding:0 4px;';
+  title.textContent = 'タイムライン（直近90日）';
+  wrap.appendChild(title);
+  const evs = loadEvents().filter(ev => shouldShow(ev));
+  renderTimeline(evs, wrap);
+  container.appendChild(wrap);
+}
+
+function renderTimeline(events, container){
+  const today=new Date(); today.setHours(0,0,0,0);
+  const tStr=toDateStr(today);
+  const BEFORE=15, AFTER=75, TOTAL=BEFORE+AFTER+1, DW=26;
+  const startD=new Date(today); startD.setDate(startD.getDate()-BEFORE);
+  const endD=new Date(today);   endD.setDate(endD.getDate()+AFTER);
+  const startStr=toDateStr(startD), endStr=toDateStr(endD);
+
+  const tlEvs=events.filter(ev=>{ const e=ev.end||ev.start; return ev.start<=endStr&&e>=startStr&&shouldShow(ev); })
+    .sort((a,b)=>a.start.localeCompare(b.start));
+
+  if(!tlEvs.length){
+    const p=document.createElement('p');
+    p.style.cssText='color:var(--text-muted);font-size:.75rem;padding:16px;';
+    p.textContent='表示するイベントがありません';
+    container.appendChild(p);
+    return;
+  }
+
+  const wrap=document.createElement('div');
+  wrap.className='timeline-wrap';
+  const inner=document.createElement('div');
+  inner.className='timeline-inner';
+
+  // Header
+  const hdr=document.createElement('div');
+  hdr.className='timeline-header';
+  const nameColH=document.createElement('div');
+  nameColH.className='tl-name-col';
+  nameColH.textContent='イベント名';
+  hdr.appendChild(nameColH);
+  const daysRow=document.createElement('div');
+  daysRow.className='tl-days-row';
+  for(let i=0;i<TOTAL;i++){
+    const d=new Date(startD); d.setDate(d.getDate()+i);
+    const dStr=toDateStr(d);
+    const isToday=dStr===tStr, isWe=d.getDay()===0||d.getDay()===6;
+    let lbl='';
+    if(isToday) lbl='▼';
+    else if(d.getDate()===1) lbl=`${d.getMonth()+1}/1`;
+    else if(d.getDate()%7===1) lbl=String(d.getDate());
+    const dh=document.createElement('div');
+    dh.className=`tl-day-h${isToday?' tl-today':''}${isWe?' tl-we':''}`;
+    dh.textContent=lbl; dh.title=dStr;
+    daysRow.appendChild(dh);
+  }
+  hdr.appendChild(daysRow);
+  inner.appendChild(hdr);
+
+  // Body
+  const body=document.createElement('div');
+  tlEvs.forEach(ev=>{
+    const row=document.createElement('div');
+    row.className='timeline-row';
+    const tent=ev.tentative===true||ev.tentative==='TRUE'||ev.tentative==='true';
+
+    const nameEl=document.createElement('div');
+    nameEl.className='tl-ev-name';
+    nameEl.style.borderLeft=`3px solid ${evColor(ev)}`;
+    nameEl.textContent=tent?`〔仮〕${ev.title}`:ev.title;
+    nameEl.title=ev.title;
+    nameEl.onclick=()=>openDetail(ev.id);
+    row.appendChild(nameEl);
+
+    const cells=document.createElement('div');
+    cells.className='tl-cells';
+    cells.style.cssText=`width:${TOTAL*DW}px;min-width:${TOTAL*DW}px;position:relative;`;
+
+    for(let i=0;i<TOTAL;i++){
+      const d=new Date(startD); d.setDate(d.getDate()+i);
+      const dStr=toDateStr(d);
+      const isTd=dStr===tStr, isWe=d.getDay()===0||d.getDay()===6;
+      const cell=document.createElement('div');
+      cell.className=`tl-cell${isTd?' tl-today':''}${isWe?' tl-we':''}`;
+      cells.appendChild(cell);
+    }
+
+    const evEnd=ev.end||ev.start;
+    const bStart=Math.max(0, Math.round((new Date(ev.start)-startD)/86400000));
+    const bEnd=Math.min(TOTAL-1, Math.round((new Date(evEnd)-startD)/86400000));
+    if(bEnd>=0&&bStart<TOTAL){
+      const bar=document.createElement('div');
+      bar.className=`tl-bar${tent?' tl-tent':''}`;
+      const barW=Math.max(DW,(bEnd-bStart+1)*DW-2);
+      bar.style.left=(bStart*DW)+'px';
+      bar.style.width=barW+'px';
+      if(tent){ bar.style.border=`1.5px dashed ${evColor(ev)}`; bar.style.color=evColor(ev); }
+      else { bar.style.background=evColor(ev)+'cc'; }
+      bar.title=`${ev.title}：${ev.start}〜${evEnd}`;
+      bar.onclick=()=>openDetail(ev.id);
+      if(barW>40) bar.textContent=ev.title;
+      cells.appendChild(bar);
+    }
+    row.appendChild(cells);
+    body.appendChild(row);
+  });
+  inner.appendChild(body);
+  wrap.appendChild(inner);
+  container.appendChild(wrap);
+
+  // 今日を中心にスクロール
+  setTimeout(()=>{ wrap.scrollLeft=Math.max(0,(BEFORE-4)*DW); },60);
+}
+
+// ── Boot ──
+window._sheetsEvents = [];
+window._sheetURL = localStorage.getItem('bs3_sheet_url') || '';
+// シートURLが設定済みの場合はローカルの古いデータをクリア
+if(SHEET_CSV_URL || window._sheetURL){
+  localStorage.removeItem('bs3_local');
+}
+initSamples();
+switchView('week');
+// 保存済みURLがあれば自動読み込み
+loadFromSheetDynamic();
+loadKPIData();
+</script>
+</div><!-- .app-wrap -->
+</body>
+</html>
