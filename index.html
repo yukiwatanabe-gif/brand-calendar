@@ -16,15 +16,15 @@
     --text-muted: #7d9099;
     --accent: #5a9aaa;
     --accent-dark: #4a8292;
-    --cat-campaign: #b8604a;
-    --cat-launch:   #4a9268;
-    --cat-deadline: #7a5498;
-    --cat-event:    #4a7eaa;
+    --cat-campaign: #e05a2a;
+    --cat-launch:   #2a9e5c;
+    --cat-deadline: #8b3fcf;
+    --cat-event:    #1a7ec8;
     --cat-other:    #7a8a82;
-    --cat-campaign-soft: rgba(184,96,74,0.12);
-    --cat-launch-soft:   rgba(74,146,104,0.12);
-    --cat-deadline-soft: rgba(122,84,152,0.12);
-    --cat-event-soft:    rgba(74,126,170,0.12);
+    --cat-campaign-soft: rgba(224,90,42,0.13);
+    --cat-launch-soft:   rgba(42,158,92,0.13);
+    --cat-deadline-soft: rgba(139,63,207,0.13);
+    --cat-event-soft:    rgba(26,126,200,0.13);
     --cat-other-soft:    rgba(122,138,130,0.12);
   }
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -123,7 +123,7 @@
   .month-add-btn:hover { color:var(--accent); }
 
   /* ── Event Cards ── */
-  .event-card { border-radius:8px; padding:6px 9px; font-size:.69rem; border-left:3px solid transparent; cursor:pointer; transition:transform .12s, box-shadow .12s; position:relative; }
+  .event-card { border-radius:8px; padding:6px 9px; font-size:.69rem; border-left:5px solid transparent; cursor:pointer; transition:transform .12s, box-shadow .12s; position:relative; }
   .event-card:hover { transform:translateX(2px); box-shadow:2px 2px 8px rgba(0,0,0,.07); }
   .ev-cat { font-family:'Noto Sans JP',sans-serif; font-size:.57rem; opacity:.7; letter-spacing:.07em; text-transform:uppercase; margin-bottom:2px; }
   .ev-title { font-weight:500; line-height:1.35; color:var(--text); }
@@ -408,6 +408,11 @@ function checkPW(){
   <div class="team-chip" data-team="ec" onclick="filterTeam('ec',this)">EC</div>
   <div class="team-chip" data-team="design" onclick="filterTeam('design',this)">デザイン</div>
   <div class="team-chip" data-team="vmd" onclick="filterTeam('vmd',this)">VMD</div>
+</div>
+<div id="activeFilterBar" style="display:none;margin-bottom:12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+  <span style="font-size:.62rem;color:var(--text-muted);letter-spacing:.08em;">絞り込み中:</span>
+  <span id="activeFilterBadges" style="display:flex;gap:5px;flex-wrap:wrap;"></span>
+  <span onclick="clearFilters()" style="font-size:.62rem;color:var(--accent);cursor:pointer;margin-left:4px;">✕ クリア</span>
 </div>
 
 <!-- Week View -->
@@ -980,11 +985,39 @@ function onSearch(val){ searchQuery=val.trim(); render(); }
 function filterCat(cat,el){
   activeCat=cat;
   document.querySelectorAll('[data-cat]').forEach(li=>li.classList.toggle('dimmed', cat!=='all'&&li.dataset.cat!==cat&&li.dataset.cat!=='all'));
+  updateActiveFilterBar();
   render();
 }
 function filterTeam(team,el){
   activeTeam=team;
   document.querySelectorAll('[data-team]').forEach(c=>c.classList.toggle('active', c.dataset.team===team));
+  updateActiveFilterBar();
+  render();
+}
+function updateActiveFilterBar(){
+  const bar=document.getElementById('activeFilterBar');
+  const badges=document.getElementById('activeFilterBadges');
+  const isFiltered=activeCat!=='all'||activeTeam!=='all';
+  bar.style.display=isFiltered?'flex':'none';
+  badges.innerHTML='';
+  if(activeCat!=='all'){
+    const b=document.createElement('span');
+    b.style.cssText=`font-size:.65rem;padding:2px 9px;border-radius:10px;background:var(--accent);color:#fff;font-weight:600;`;
+    b.textContent='カテゴリ: '+({campaign:'Campaign',launch:'新商品発売',deadline:'締め切り',event:'イベント',other:'その他'}[activeCat]||activeCat);
+    badges.appendChild(b);
+  }
+  if(activeTeam!=='all'){
+    const b=document.createElement('span');
+    b.style.cssText=`font-size:.65rem;padding:2px 9px;border-radius:10px;background:var(--accent-dark);color:#fff;font-weight:600;`;
+    b.textContent='チーム: '+(TEAMS[activeTeam]||activeTeam);
+    badges.appendChild(b);
+  }
+}
+function clearFilters(){
+  activeCat='all'; activeTeam='all';
+  document.querySelectorAll('[data-cat]').forEach(li=>li.classList.remove('dimmed'));
+  document.querySelectorAll('[data-team]').forEach(c=>c.classList.toggle('active',c.dataset.team==='all'));
+  updateActiveFilterBar();
   render();
 }
 
@@ -1130,12 +1163,18 @@ function renderMonth(){
     const maxShow=3;
     dayEvs.slice(0,maxShow).forEach(ev=>{
       const tentative=ev.tentative===true||ev.tentative==='TRUE'||ev.tentative==='true';
+      const isFirstDay=dStr===ev.start;
       const pill=document.createElement('div');
-      pill.className='month-event'+(tentative?' tentative':'');
-      pill.style.background=evColor(ev)+'22';
-      pill.style.color=evColor(ev);
-      pill.style.borderLeft=`3px solid ${evColor(ev)}`;
-      pill.textContent=tentative?`〔仮〕${ev.title}`:ev.title;
+      pill.className='month-event'+(tentative?' tentative':'')+(isFirstDay?'':' continuation');
+      pill.style.background=evColor(ev)+(isFirstDay?'22':'18');
+      pill.style.borderLeft=`4px solid ${evColor(ev)}`;
+      if(isFirstDay){
+        pill.style.color=evColor(ev);
+        pill.textContent=tentative?`〔仮〕${ev.title}`:ev.title;
+      } else {
+        pill.style.color='transparent';
+        pill.textContent='\u200b';
+      }
       pill.onclick=()=>openDetail(ev.id);
       cell.appendChild(pill);
     });
