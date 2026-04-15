@@ -123,7 +123,7 @@
   .month-add-btn:hover { color:var(--accent); }
 
   /* ── Event Cards ── */
-  .event-card { border-radius:8px; padding:6px 9px; font-size:.69rem; border-left:5px solid transparent; cursor:pointer; transition:transform .12s, box-shadow .12s; position:relative; }
+  .event-card { border-radius:8px; padding:6px 9px; font-size:.69rem; border-left:6px solid transparent; cursor:pointer; transition:transform .12s, box-shadow .12s; position:relative; }
   .event-card:hover { transform:translateX(2px); box-shadow:2px 2px 8px rgba(0,0,0,.07); }
   .ev-cat { font-family:'Noto Sans JP',sans-serif; font-size:.57rem; opacity:.7; letter-spacing:.07em; text-transform:uppercase; margin-bottom:2px; }
   .ev-title { font-weight:500; line-height:1.35; color:var(--text); }
@@ -1167,13 +1167,14 @@ function renderMonth(){
       const pill=document.createElement('div');
       pill.className='month-event'+(tentative?' tentative':'')+(isFirstDay?'':' continuation');
       pill.style.background=evColor(ev)+(isFirstDay?'22':'18');
-      pill.style.borderLeft=`4px solid ${evColor(ev)}`;
+      pill.style.borderLeft=`6px solid ${evColor(ev)}`;
       if(isFirstDay){
         pill.style.color=evColor(ev);
         pill.textContent=tentative?`〔仮〕${ev.title}`:ev.title;
       } else {
-        pill.style.color='transparent';
-        pill.textContent='\u200b';
+        pill.style.color='var(--text-muted)';
+        pill.style.fontSize='.58rem';
+        pill.textContent='▶ 継続中';
       }
       pill.onclick=()=>openDetail(ev.id);
       cell.appendChild(pill);
