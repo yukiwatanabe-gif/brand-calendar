@@ -225,6 +225,17 @@
   ::-webkit-scrollbar { width:3px; }
   ::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
 
+  /* ── Tooltip ── */
+  .cal-tooltip {
+    position:fixed; z-index:9999; pointer-events:none;
+    background:#1a2830; color:#fff; border-radius:7px;
+    padding:7px 11px; font-size:.72rem; font-family:'Noto Sans JP',sans-serif;
+    line-height:1.6; max-width:220px; white-space:pre-wrap;
+    box-shadow:0 4px 16px rgba(0,0,0,.22);
+    opacity:0; transition:opacity .12s;
+  }
+  .cal-tooltip.show { opacity:1; }
+
   /* Toolbar */
   .toolbar { display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap; }
 
@@ -321,6 +332,7 @@
 </style>
 </head>
 <body>
+<div id="calTooltip" class="cal-tooltip"></div>
 
 <div id="pwLock">
   <div id="pwBox">
@@ -1023,6 +1035,28 @@ function clearFilters(){
 
 // ── Format helpers ──
 function fmt(s){ const[,m,d]=s.split('-'); return `${+m}/${+d}`; }
+
+// ── Tooltip ──
+const _tt=document.getElementById('calTooltip');
+let _ttTimer=null;
+function showTooltip(el,text){
+  clearTimeout(_ttTimer);
+  _tt.textContent=text;
+  _tt.classList.add('show');
+  const move=e=>{
+    const vw=window.innerWidth, vh=window.innerHeight;
+    let x=e.clientX+14, y=e.clientY+14;
+    if(x+240>vw) x=e.clientX-240;
+    if(y+80>vh)  y=e.clientY-60;
+    _tt.style.left=x+'px'; _tt.style.top=y+'px';
+  };
+  el._ttMove=move;
+  el.addEventListener('mousemove',move);
+}
+function hideTooltip(el){
+  _tt.classList.remove('show');
+  if(el._ttMove){ el.removeEventListener('mousemove',el._ttMove); delete el._ttMove; }
+}
 function fmtFull(s){ const[y,m,d]=s.split('-'); return `${y}年${+m}月${+d}日`; }
 function pad(n){ return String(n).padStart(2,'0'); }
 function toDateStr(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
@@ -1175,15 +1209,21 @@ function renderMonth(){
         pill.style.color='var(--text-muted)';
         pill.style.fontSize='.58rem';
         pill.textContent='▶ 継続中';
+        pill.addEventListener('mouseenter',()=>showTooltip(pill,ev.title+(ev.end&&ev.end!==ev.start?`\n${fmt(ev.start)}〜${fmt(ev.end)}`:'') ));
+        pill.addEventListener('mouseleave',()=>hideTooltip(pill));
       }
       pill.onclick=()=>openDetail(ev.id);
       cell.appendChild(pill);
     });
     if(dayEvs.length>maxShow){
+      const hiddenEvs=dayEvs.slice(maxShow);
       const more=document.createElement('div');
       more.className='month-more';
-      more.textContent=`+${dayEvs.length-maxShow}件`;
+      more.textContent=`+${hiddenEvs.length}件`;
       more.onclick=()=>openAddModal(dStr);
+      const tipText=hiddenEvs.map(ev=>`・${ev.title}`).join('\n');
+      more.addEventListener('mouseenter',()=>showTooltip(more,tipText));
+      more.addEventListener('mouseleave',()=>hideTooltip(more));
       cell.appendChild(more);
     }
 
