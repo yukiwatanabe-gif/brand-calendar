@@ -129,7 +129,6 @@
   .ev-title { font-weight:700; line-height:1.35; color:#111820; }
   .ev-team { font-size:.58rem; margin-top:3px; color:var(--text-muted); }
   .event-card.is-span::after { content:'↔'; position:absolute; right:6px; top:6px; opacity:.35; font-size:.62rem; }
-  .ev-source-badge { display:inline-block; font-size:.52rem; font-weight:700; letter-spacing:.04em; padding:1px 5px; border-radius:3px; margin-left:5px; vertical-align:middle; background:#1060a0; color:#fff; opacity:.75; }
   .event-card.hidden { display:none; }
   .event-card.tentative { border-style:dashed; opacity:.75; }
   .event-card.tentative .ev-title::after { content:' 〔仮〕'; font-size:.6rem; opacity:.7; font-weight:400; }
@@ -421,8 +420,6 @@ function checkPW(){
   <div class="team-chip" data-team="ec" onclick="filterTeam('ec',this)">EC</div>
   <div class="team-chip" data-team="design" onclick="filterTeam('design',this)">デザイン</div>
   <div class="team-chip" data-team="vmd" onclick="filterTeam('vmd',this)">VMD</div>
-  <div class="team-chip" data-team="corporate" onclick="filterTeam('corporate',this)">法人</div>
-  <div class="team-chip" data-team="sns" onclick="filterTeam('sns',this)">SNS</div>
 </div>
 <div id="activeFilterBar" style="display:none;margin-bottom:12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
   <span style="font-size:.62rem;color:var(--text-muted);letter-spacing:.08em;">絞り込み中:</span>
@@ -484,8 +481,6 @@ function checkPW(){
         <option value="ec">EC</option>
         <option value="design">デザイン</option>
         <option value="vmd">VMD</option>
-        <option value="corporate">法人</option>
-        <option value="sns">SNS</option>
       </select>
     </div>
     <div class="form-row">
@@ -557,8 +552,6 @@ function checkPW(){
         <option value="ec">EC</option>
         <option value="design">デザイン</option>
         <option value="vmd">VMD</option>
-        <option value="corporate">法人</option>
-        <option value="sns">SNS</option>
       </select>
     </div>
     <div class="form-row">
@@ -823,7 +816,7 @@ const CATS = {
   event:   { label:'イベント・施策',   icon:'🎯', color:'#2a5a8a' },
   other:   { label:'その他',           icon:'📌', color:'#7a6a4a' },
 };
-const TEAMS = { all:'全チーム', promo:'プロモーション', sponsor:'協賛', ad:'広告', ec:'EC', design:'デザイン', vmd:'VMD', corporate:'法人', sns:'SNS' };
+const TEAMS = { all:'全チーム', promo:'プロモーション', sponsor:'協賛', ad:'広告', ec:'EC', design:'デザイン', vmd:'VMD' };
 const VALID_TYPES = Object.keys(CATS);
 const VALID_TEAMS = Object.keys(TEAMS);
 
@@ -1259,19 +1252,9 @@ function makeEventCard(ev){
     card.style.borderLeftColor=c;
     card.style.background=c+'20';
   }
-  if(ev.team==='corporate'){
-    card.style.borderLeftColor='#1a6b3c';
-    card.style.background='rgba(26,107,60,0.10)';
-  }
-  if(ev.team==='sns'){
-    card.style.borderLeftColor='#9333ea';
-    card.style.background='rgba(147,51,234,0.10)';
-  }
-  const isBacklog = ev._fromSheet && (ev.memo||'').includes('backlog.com');
-  const sourceBadge = isBacklog ? '<span class="ev-source-badge">BL</span>' : '';
   card.innerHTML=`
     <div class="ev-cat">${CATS[ev.type].icon} ${CATS[ev.type].label}</div>
-    <div class="ev-title">${ev.title}${sourceBadge}</div>
+    <div class="ev-title">${ev.title}</div>
     <div class="ev-team">${TEAMS[ev.team]||TEAMS.all}</div>`;
   card.onclick=()=>openDetail(ev.id);
   return card;
