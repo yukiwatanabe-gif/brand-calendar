@@ -424,6 +424,12 @@ function checkPW(){
       <span class="search-icon">🔍</span>
       <input type="text" class="search-input" id="searchInput" placeholder="イベントを検索..." oninput="onSearch(this.value)">
     </div>
+    <div class="view-toggle">
+      <button class="vt-btn active" id="vtWeek" onclick="switchView('week')">7日</button>
+      <button class="vt-btn" id="vtMonth" onclick="switchView('month')">月表示</button>
+      <button class="vt-btn" id="vtTimeline" onclick="switchView('timeline')">タイムライン</button>
+      <button class="vt-btn" id="vtDash" onclick="switchView('dashboard')">ダッシュボード</button>
+    </div>
     <button class="nav-btn" onclick="openCSVModal()">CSV</button>
     <button class="nav-btn gcal" onclick="openGCalModal()">📅 Google連携</button>
   </div>
