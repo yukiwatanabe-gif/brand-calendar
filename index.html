@@ -866,7 +866,7 @@ let searchQuery = '';
 // ── Google Sheets 設定 ──
 // ★ STEP 1: ここにGoogleスプレッドシートの「公開URL」を貼り付ける
 // 取得方法: スプレッドシート → ファイル → 共有 → ウェブに公開 → CSV形式のURLをコピー
-const SHEET_CSV_URL = 'https://script.google.com/macros/s/AKfycbzeJjyWmMhu2X6LTwnpBT81s83-FFU4uWMcbcksyI7D0fu36c8mMZTW6u71gQ1IUJUj/exec';
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1rTa6wzZvgow63PBR-TpF5wsP6H_QTR36ji_SC3bRPgM/pub?gid=894415878&single=true&output=csv';
 
 // ── Storage ──
 // sheetsEvents = Googleスプレッドシートから読み込んだイベント（読み取り専用）
@@ -2031,7 +2031,7 @@ if(SHEET_CSV_URL || window._sheetURL){
 initSamples();
 switchView('week');
 // 保存済みURLがあれば自動読み込み
-loadFromSheetDynamic();
+loadFromSheet();
 loadKPIData();
 </script>
 </div><!-- .app-wrap -->
