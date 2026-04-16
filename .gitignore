@@ -1,0 +1,8 @@
+# GAS（APIキーを含むため除外）
+brand_calendar_v3.js
+appsscript.json
+.clasp.json
+.claspignore
+
+# Node
+node_modules/
