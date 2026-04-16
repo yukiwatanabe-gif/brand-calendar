@@ -411,7 +411,6 @@ function checkPW(){
 </div>
 <div class="main-content">
 <header>
-<header>
   <div class="header-left">
     <h1>Brand Strategy</h1>
     <p id="weekRange">—</p>
@@ -988,10 +987,10 @@ function initSamples(){
 function switchView(v){
   currentView = v;
   offset = 0;
-  document.getElementById('vtWeek').classList.toggle('active', v==='week');
-  document.getElementById('vtMonth').classList.toggle('active', v==='month');
-  document.getElementById('vtTimeline').classList.toggle('active', v==='timeline');
-  document.getElementById('vtDash').classList.toggle('active', v==='dashboard');
+  document.getElementById('vtWeek')?.classList.toggle('active', v==='week');
+  document.getElementById('vtMonth')?.classList.toggle('active', v==='month');
+  document.getElementById('vtTimeline')?.classList.toggle('active', v==='timeline');
+  document.getElementById('vtDash')?.classList.toggle('active', v==='dashboard');
   document.getElementById('weekView').style.display = v==='week' ? 'block' : 'none';
   document.getElementById('monthView').style.display = v==='month' ? 'block' : 'none';
   document.getElementById('dashboardView').style.display = v==='dashboard' ? 'block' : 'none';
