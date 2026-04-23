@@ -21,11 +21,13 @@
     --cat-deadline: #c0392b;
     --cat-event:    #1565c0;
     --cat-other:    #5a6a72;
+    --cat-hojin:    #5c4a9e;
     --cat-campaign-soft: rgba(217,79,30,0.12);
     --cat-launch-soft:   rgba(30,143,80,0.12);
     --cat-deadline-soft: rgba(192,57,43,0.15);
     --cat-event-soft:    rgba(21,101,192,0.11);
     --cat-other-soft:    rgba(90,106,114,0.10);
+    --cat-hojin-soft:    rgba(92,74,158,0.12);
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family:'Noto Sans JP',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding:0; }
@@ -138,6 +140,7 @@
   .c-deadline { background:var(--cat-deadline-soft); border-left-color:var(--cat-deadline); box-shadow:inset 0 0 0 1px rgba(192,57,43,.2); }
   .c-event    { background:var(--cat-event-soft);    border-left-color:var(--cat-event); }
   .c-other    { background:var(--cat-other-soft);    border-left-color:var(--cat-other); }
+  .c-hojin    { background:var(--cat-hojin-soft);    border-left-color:var(--cat-hojin); }
 
   .add-mini { background:transparent; border:1px dashed var(--border); color:var(--text-muted); border-radius:4px; width:100%; padding:4px; font-size:.66rem; cursor:pointer; transition:all .13s; margin-bottom:2px; }
   .add-mini:hover { border-color:var(--accent); color:var(--accent); border-style:solid; }
@@ -409,6 +412,7 @@ function checkPW(){
   <div class="legend-item" data-cat="deadline" onclick="filterCat('deadline',this)"><span class="legend-pill" style="background:var(--cat-deadline)"></span>締め切り・承認</div>
   <div class="legend-item" data-cat="event" onclick="filterCat('event',this)"><span class="legend-pill" style="background:var(--cat-event)"></span>イベント・施策</div>
   <div class="legend-item" data-cat="other" onclick="filterCat('other',this)"><span class="legend-pill" style="background:var(--cat-other)"></span>その他</div>
+  <div class="legend-item" data-cat="hojin" onclick="filterCat('hojin',this)"><span class="legend-pill" style="background:var(--cat-hojin)"></span>法人</div>
 </div>
 <!-- Team Filter -->
 <div class="team-bar">
@@ -469,6 +473,7 @@ function checkPW(){
         <option value="deadline">⏰ 締め切り・承認日</option>
         <option value="event">🎯 イベント・施策</option>
         <option value="other">📌 その他</option>
+        <option value="hojin">🏢 法人</option>
       </select>
     </div>
     <div class="form-row">
@@ -540,6 +545,7 @@ function checkPW(){
         <option value="deadline">⏰ 締め切り・承認日</option>
         <option value="event">🎯 イベント・施策</option>
         <option value="other">📌 その他</option>
+        <option value="hojin">🏢 法人</option>
       </select>
     </div>
     <div class="form-row">
@@ -815,6 +821,7 @@ const CATS = {
   deadline:{ label:'締め切り・承認日', icon:'⏰', color:'#6a3a8a' },
   event:   { label:'イベント・施策',   icon:'🎯', color:'#2a5a8a' },
   other:   { label:'その他',           icon:'📌', color:'#7a6a4a' },
+  hojin:   { label:'法人',             icon:'🏢', color:'#5c4a9e' },
 };
 const TEAMS = { all:'全チーム', promo:'プロモーション', sponsor:'協賛', ad:'広告', ec:'EC', design:'デザイン', vmd:'VMD' };
 const VALID_TYPES = Object.keys(CATS);
@@ -1015,7 +1022,7 @@ function updateActiveFilterBar(){
   if(activeCat!=='all'){
     const b=document.createElement('span');
     b.style.cssText=`font-size:.65rem;padding:2px 9px;border-radius:10px;background:var(--accent);color:#fff;font-weight:600;`;
-    b.textContent='カテゴリ: '+({campaign:'Campaign',launch:'新商品発売',deadline:'締め切り',event:'イベント',other:'その他'}[activeCat]||activeCat);
+    b.textContent='カテゴリ: '+({campaign:'Campaign',launch:'新商品発売',deadline:'締め切り',event:'イベント',other:'その他',hojin:'法人'}[activeCat]||activeCat);
     badges.appendChild(b);
   }
   if(activeTeam!=='all'){
