@@ -29,18 +29,7 @@
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family:'Noto Sans JP',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding:0; }
-  .app-wrap { max-width:100vw; padding:16px; overflow-x:hidden; display:flex; gap:20px; }
-
-  /* ── Sidebar ── */
-  .sidebar { width:250px; flex-shrink:0; background:var(--surface); border:1.5px solid var(--border); border-radius:12px; padding:16px; }
-  .sidebar h3 { font-family:'Noto Sans JP',sans-serif; font-size:.8rem; color:var(--text-muted); margin-bottom:12px; text-transform:uppercase; letter-spacing:.05em; }
-  .calendar-views { display:flex; flex-direction:column; gap:8px; margin-bottom:20px; }
-  .cv-btn { background:transparent; border:1.5px solid var(--border); color:var(--text-muted); padding:10px 14px; border-radius:8px; cursor:pointer; font-family:'Noto Sans JP',sans-serif; font-size:.75rem; transition:all .15s; text-align:left; }
-  .cv-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
-  .cv-btn:hover:not(.active) { border-color:var(--accent); color:var(--accent); }
-
-  /* Main content */
-  .main-content { flex:1; }
+  .app-wrap { max-width:100vw; padding:16px; overflow-x:hidden; }
 
   /* ── Header ── */
   header {
@@ -85,8 +74,8 @@
   header .vt-btn:hover:not(.active) { background:rgba(255,255,255,.2); color:#fff; }
 
   /* ── Filters ── */
-  .filter-bar { display:flex; flex-direction:column; gap:6px; margin-bottom:16px; }
-  .filter-label { font-family:'Noto Sans JP',sans-serif; font-size:.63rem; color:var(--text-muted); letter-spacing:.1em; text-transform:uppercase; margin-bottom:4px; }
+  .filter-bar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:10px; }
+  .filter-label { font-family:'Noto Sans JP',sans-serif; font-size:.63rem; color:var(--text-muted); letter-spacing:.1em; text-transform:uppercase; margin-right:2px; }
   .legend-item {
     display:flex; align-items:center; gap:7px; font-size:.71rem; color:var(--text-muted);
     cursor:pointer; padding:4px 12px; border-radius:3px; border:1.5px solid var(--border);
@@ -95,7 +84,7 @@
   .legend-item.dimmed { opacity:.35; }
   .legend-pill { width:20px; height:5px; border-radius:3px; flex-shrink:0; }
 
-  .team-bar { display:flex; flex-direction:column; gap:6px; margin-bottom:18px; }
+  .team-bar { display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-bottom:18px; }
   .team-chip { font-size:.68rem; padding:4px 14px; border-radius:20px; border:1.5px solid var(--border); background:var(--surface); cursor:pointer; color:var(--text-muted); transition:all .15s; user-select:none; }
   .team-chip.active { background:var(--accent); color:#fff; border-color:var(--accent); }
   .team-chip:not(.active):hover { border-color:var(--accent); color:var(--accent); }
@@ -140,7 +129,6 @@
   .ev-title { font-weight:700; line-height:1.35; color:#111820; }
   .ev-team { font-size:.58rem; margin-top:3px; color:var(--text-muted); }
   .event-card.is-span::after { content:'↔'; position:absolute; right:6px; top:6px; opacity:.35; font-size:.62rem; }
-  .ev-source-badge { display:inline-block; font-size:.52rem; font-weight:700; letter-spacing:.04em; padding:1px 5px; border-radius:3px; margin-left:5px; vertical-align:middle; background:#1060a0; color:#fff; opacity:.75; }
   .event-card.hidden { display:none; }
   .event-card.tentative { border-style:dashed; opacity:.75; }
   .event-card.tentative .ev-title::after { content:' 〔仮〕'; font-size:.6rem; opacity:.7; font-weight:400; }
@@ -378,45 +366,18 @@ function checkPW(){
 </script>
 
 <div class="app-wrap">
-<div class="sidebar">
-  <h3>カレンダー表示</h3>
-  <div class="calendar-views">
-    <button class="cv-btn active" id="vtAll" onclick="switchCalendarView('all')">全部表示</button>
-    <button class="cv-btn" id="vtInternal" onclick="switchCalendarView('internal')">部内カレンダー</button>
-    <button class="cv-btn" id="vtDelivery" onclick="switchCalendarView('delivery')">配信カレンダー</button>
-  </div>
-  <h3>フィルター</h3>
-  <div class="filter-bar">
-    <span class="filter-label">カテゴリ</span>
-    <div class="legend-item" data-cat="all" onclick="filterCat('all',this)"><span class="legend-pill" style="background:#aaa8a2"></span>すべて</div>
-    <div class="legend-item" data-cat="campaign" onclick="filterCat('campaign',this)"><span class="legend-pill" style="background:var(--cat-campaign)"></span>Campaign</div>
-    <div class="legend-item" data-cat="launch" onclick="filterCat('launch',this)"><span class="legend-pill" style="background:var(--cat-launch)"></span>新商品発売</div>
-    <div class="legend-item" data-cat="deadline" onclick="filterCat('deadline',this)"><span class="legend-pill" style="background:var(--cat-deadline)"></span>締め切り・承認</div>
-    <div class="legend-item" data-cat="event" onclick="filterCat('event',this)"><span class="legend-pill" style="background:var(--cat-event)"></span>イベント・施策</div>
-    <div class="legend-item" data-cat="other" onclick="filterCat('other',this)"><span class="legend-pill" style="background:var(--cat-other)"></span>その他</div>
-  </div>
-  <!-- Team Filter -->
-  <div class="team-bar">
-    <span class="filter-label">チーム</span>
-    <div class="team-chip active" data-team="all" onclick="filterTeam('all',this)">すべて</div>
-    <div class="team-chip" data-team="promo" onclick="filterTeam('promo',this)">プロモーション</div>
-    <div class="team-chip" data-team="sponsor" onclick="filterTeam('sponsor',this)">協賛</div>
-    <div class="team-chip" data-team="ad" onclick="filterTeam('ad',this)">広告</div>
-    <div class="team-chip" data-team="ec" onclick="filterTeam('ec',this)">EC</div>
-    <div class="team-chip" data-team="design" onclick="filterTeam('design',this)">デザイン</div>
-    <div class="team-chip" data-team="vmd" onclick="filterTeam('vmd',this)">VMD</div>
-    <div class="team-chip" data-team="corporate" onclick="filterTeam('corporate',this)">法人</div>
-    <div class="team-chip" data-team="sns" onclick="filterTeam('sns',this)">SNS</div>
-  </div>
-</div>
-<div class="main-content">
-<header>
 <header>
   <div class="header-left">
     <h1>Brand Strategy</h1>
     <p id="weekRange">—</p>
   </div>
   <div class="header-right">
+    <div class="view-toggle">
+      <button class="vt-btn active" id="vtWeek" onclick="switchView('week')">7日</button>
+      <button class="vt-btn" id="vtMonth" onclick="switchView('month')">月表示</button>
+      <button class="vt-btn" id="vtTimeline" onclick="switchView('timeline')">タイムライン</button>
+      <button class="vt-btn" id="vtDash" onclick="switchView('dashboard')">ダッシュボード</button>
+    </div>
     <button class="nav-btn" id="prevBtn" onclick="shiftPeriod(-1)">← 前</button>
     <div class="date-label" id="periodLabel">—</div>
     <button class="nav-btn" id="nextBtn" onclick="shiftPeriod(1)">次 →</button>
@@ -437,6 +398,28 @@ function checkPW(){
     <button class="nav-btn" style="font-size:.68rem;padding:4px 12px;" onclick="loadFromSheetDynamic()">🔄 シートを再読み込み</button>
     <button class="nav-btn" style="font-size:.68rem;padding:4px 12px;border-color:var(--cat-deadline);color:var(--cat-deadline);" onclick="openSheetSetupModal()">⚙ シート設定</button>
   </div>
+</div>
+
+<!-- Category Filter -->
+<div class="filter-bar">
+  <span class="filter-label">カテゴリ</span>
+  <div class="legend-item" data-cat="all" onclick="filterCat('all',this)"><span class="legend-pill" style="background:#aaa8a2"></span>すべて</div>
+  <div class="legend-item" data-cat="campaign" onclick="filterCat('campaign',this)"><span class="legend-pill" style="background:var(--cat-campaign)"></span>Campaign</div>
+  <div class="legend-item" data-cat="launch" onclick="filterCat('launch',this)"><span class="legend-pill" style="background:var(--cat-launch)"></span>新商品発売</div>
+  <div class="legend-item" data-cat="deadline" onclick="filterCat('deadline',this)"><span class="legend-pill" style="background:var(--cat-deadline)"></span>締め切り・承認</div>
+  <div class="legend-item" data-cat="event" onclick="filterCat('event',this)"><span class="legend-pill" style="background:var(--cat-event)"></span>イベント・施策</div>
+  <div class="legend-item" data-cat="other" onclick="filterCat('other',this)"><span class="legend-pill" style="background:var(--cat-other)"></span>その他</div>
+</div>
+<!-- Team Filter -->
+<div class="team-bar">
+  <span class="filter-label">チーム</span>
+  <div class="team-chip active" data-team="all" onclick="filterTeam('all',this)">すべて</div>
+  <div class="team-chip" data-team="promo" onclick="filterTeam('promo',this)">プロモーション</div>
+  <div class="team-chip" data-team="sponsor" onclick="filterTeam('sponsor',this)">協賛</div>
+  <div class="team-chip" data-team="ad" onclick="filterTeam('ad',this)">広告</div>
+  <div class="team-chip" data-team="ec" onclick="filterTeam('ec',this)">EC</div>
+  <div class="team-chip" data-team="design" onclick="filterTeam('design',this)">デザイン</div>
+  <div class="team-chip" data-team="vmd" onclick="filterTeam('vmd',this)">VMD</div>
 </div>
 <div id="activeFilterBar" style="display:none;margin-bottom:12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
   <span style="font-size:.62rem;color:var(--text-muted);letter-spacing:.08em;">絞り込み中:</span>
@@ -463,8 +446,6 @@ function checkPW(){
   <h3>近日スタート</h3>
   <div class="upcoming-list" id="upcomingList"></div>
 </div>
-</div> <!-- main-content close -->
-</div> <!-- app-wrap close -->
 
 <button class="fab" onclick="openAddModal(null)" title="イベント追加">＋</button>
 
@@ -500,8 +481,6 @@ function checkPW(){
         <option value="ec">EC</option>
         <option value="design">デザイン</option>
         <option value="vmd">VMD</option>
-        <option value="corporate">法人</option>
-        <option value="sns">SNS</option>
       </select>
     </div>
     <div class="form-row">
@@ -573,8 +552,6 @@ function checkPW(){
         <option value="ec">EC</option>
         <option value="design">デザイン</option>
         <option value="vmd">VMD</option>
-        <option value="corporate">法人</option>
-        <option value="sns">SNS</option>
       </select>
     </div>
     <div class="form-row">
@@ -839,7 +816,7 @@ const CATS = {
   event:   { label:'イベント・施策',   icon:'🎯', color:'#2a5a8a' },
   other:   { label:'その他',           icon:'📌', color:'#7a6a4a' },
 };
-const TEAMS = { all:'全チーム', promo:'プロモーション', sponsor:'協賛', ad:'広告', ec:'EC', design:'デザイン', vmd:'VMD', corporate:'法人', sns:'SNS' };
+const TEAMS = { all:'全チーム', promo:'プロモーション', sponsor:'協賛', ad:'広告', ec:'EC', design:'デザイン', vmd:'VMD' };
 const VALID_TYPES = Object.keys(CATS);
 const VALID_TEAMS = Object.keys(TEAMS);
 
@@ -873,7 +850,6 @@ const MONTH_NAMES = ['1月','2月','3月','4月','5月','6月','7月','8月','9�
 // ── State ──
 let offset = 0;
 let currentView = 'week';
-let currentCalendarType = 'all';
 let activeCat = 'all';
 let activeTeam = 'all';
 let selectedId = null;
@@ -998,16 +974,9 @@ function switchView(v){
   document.getElementById('timelineView').style.display = v==='timeline' ? 'block' : 'none';
   document.querySelector('.upcoming-section').style.display = (v==='dashboard'||v==='timeline') ? 'none' : '';
   const nav = (v==='week'||v==='month');
-  document.getElementById('prevBtn').style.display = nav ? '' : 'none';
-  document.getElementById('nextBtn').style.display = nav ? '' : 'none';
-  document.getElementById('periodLabel').style.display = nav ? '' : 'none';
-  render();
-}
-function switchCalendarView(type){
-  currentCalendarType = type;
-  document.getElementById('vtAll').classList.toggle('active', type==='all');
-  document.getElementById('vtInternal').classList.toggle('active', type==='internal');
-  document.getElementById('vtDelivery').classList.toggle('active', type==='delivery');
+  document.getElementById('prevBtn').style.visibility = nav ? '' : 'hidden';
+  document.getElementById('nextBtn').style.visibility = nav ? '' : 'hidden';
+  document.getElementById('periodLabel').style.visibility = nav ? '' : 'hidden';
   render();
 }
 function shiftPeriod(d){ offset+=d; render(); }
@@ -1018,14 +987,6 @@ function shouldShow(ev){
   if(activeCat!=='all' && ev.type!==activeCat) return false;
   // team='all' のイベントはどのチームフィルターでも表示
   if(activeTeam!=='all' && ev.team!=='all' && ev.team!==activeTeam) return false;
-  // カレンダータイプによるフィルター
-  if(currentCalendarType === 'internal'){
-    const internalTeams = ['promo', 'design', 'vmd', 'corporate', 'ec'];
-    if(ev.team !== 'all' && !internalTeams.includes(ev.team)) return false;
-  } else if(currentCalendarType === 'delivery'){
-    const deliveryTeams = ['sponsor', 'ad', 'sns'];
-    if(ev.team !== 'all' && !deliveryTeams.includes(ev.team)) return false;
-  }
   if(searchQuery){
     const q=searchQuery.toLowerCase();
     if(!(ev.title||'').toLowerCase().includes(q) && !(ev.memo||'').toLowerCase().includes(q)) return false;
@@ -1291,19 +1252,9 @@ function makeEventCard(ev){
     card.style.borderLeftColor=c;
     card.style.background=c+'20';
   }
-  if(ev.team==='corporate'){
-    card.style.borderLeftColor='#1a6b3c';
-    card.style.background='rgba(26,107,60,0.10)';
-  }
-  if(ev.team==='sns'){
-    card.style.borderLeftColor='#9333ea';
-    card.style.background='rgba(147,51,234,0.10)';
-  }
-  const isBacklog = ev._fromSheet && (ev.memo||'').includes('backlog.com');
-  const sourceBadge = isBacklog ? '<span class="ev-source-badge">BL</span>' : '';
   card.innerHTML=`
     <div class="ev-cat">${CATS[ev.type].icon} ${CATS[ev.type].label}</div>
-    <div class="ev-title">${ev.title}${sourceBadge}</div>
+    <div class="ev-title">${ev.title}</div>
     <div class="ev-team">${TEAMS[ev.team]||TEAMS.all}</div>`;
   card.onclick=()=>openDetail(ev.id);
   return card;
@@ -2062,7 +2013,6 @@ if(SHEET_CSV_URL || window._sheetURL){
 }
 initSamples();
 switchView('week');
-switchCalendarView('all');
 // 保存済みURLがあれば自動読み込み
 loadFromSheetDynamic();
 loadKPIData();
